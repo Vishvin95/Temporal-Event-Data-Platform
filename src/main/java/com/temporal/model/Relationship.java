@@ -9,6 +9,25 @@ public class Relationship {
 	private String from;
 	private String to;
 
+	public Relationship() {
+
+	}
+
+	/**
+	 * @param name : Name of the relationship
+	 * @param type : Either of four, RelationshipType.ONE_TO_ONE,
+	 *               RelationshipType.ONE_TO_MANY, RelationshipType.MANY_TO_ONE,
+	 *               RelationshipType.MANY_TO_MANY
+	 * @param from : Domain on left side of relationship
+	 * @param to   : Domain on right side of relationship
+	 */
+	public Relationship(String name, RelationshipType type, Domain from, Domain to) {
+		this.name = name;
+		this.type = type.getRelationshipType();
+		this.from = from.getname();
+		this.to = to.getname();
+	}
+
 	@XmlAttribute
 	public String getName() {
 		return name;
@@ -26,7 +45,7 @@ public class Relationship {
 	public void setType(String type) {
 		this.type = type;
 	}
-	
+
 	@XmlElement
 	public String getFrom() {
 		return from;
