@@ -77,6 +77,9 @@ public class Scenario {
 // 		Setting Scenario XML schema 		
 		SchemaFactory sf = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
 		Schema scenarioSchema = sf.newSchema(new File("ScenarioSchema.xsd"));
+
+		//Tarang : Alternate way of getting xsd
+		scenarioSchema = sf.newSchema(Thread.currentThread().getContextClassLoader().getResource("ScenarioSchema.xsd"));
 		
 // 		Unmarshal from XML to Object		
 		JAXBContext jaxbContext = JAXBContext.newInstance(Scenario.class);
