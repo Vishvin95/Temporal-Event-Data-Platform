@@ -1,4 +1,4 @@
-package persistence;
+package com.temporal.persistence;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -7,7 +7,7 @@ public class SelectBuilder extends AbstractSqlBuilder {
 
     private boolean distinct;
 
-    private List<String> tables = new ArrayList<>();
+    private List<Object> tables = new ArrayList<>();
 
     private List<String> joins = new ArrayList<>();
 
@@ -41,15 +41,17 @@ public class SelectBuilder extends AbstractSqlBuilder {
         this.forUpdate = selectBuilder.forUpdate;
         this.noWait = selectBuilder.noWait;
 
-        for(Object column : selectBuilder.columns){
-            if(column instanceof SubSelectBuilder){
-                this.columns.add(((SubSelectBuilder) column).clone());
+        this.columns.addAll(selectBuilder.columns);
+
+        for(Object table : selectBuilder.tables){
+            if(table instanceof SubSelectBuilder){
+                this.tables.add(((SubSelectBuilder) table).clone());
             }else{
-                this.columns.add(column);
+                this.tables.add(table);
             }
         }
 
-        this.tables.addAll(selectBuilder.tables);
+        //this.tables.addAll(selectBuilder.tables);
         this.joins.addAll(selectBuilder.joins);
         this.leftJoins.addAll(selectBuilder.leftJoins);
         this.wheres.addAll(selectBuilder.wheres);
@@ -62,9 +64,9 @@ public class SelectBuilder extends AbstractSqlBuilder {
         }
     }
 
-//    public SelectBuilder add(String expr){
-//        return where(expr);
-//    }
+    public SelectBuilder add(String expr){
+        return where(expr);
+    }
 
     public SelectBuilder column(String name){
         columns.add(name);
@@ -113,6 +115,11 @@ public class SelectBuilder extends AbstractSqlBuilder {
         return this;
     }
 
+    public SelectBuilder from(SubSelectBuilder subSelectBuilder){
+        tables.add(subSelectBuilder);
+        return this;
+    }
+
     public List<SelectBuilder> getUnions() {return unions;}
 
     public SelectBuilder groupBy(String expr){
@@ -132,6 +139,73 @@ public class SelectBuilder extends AbstractSqlBuilder {
 
     public SelectBuilder leftJoin(String join){
         leftJoins.add(join);
+        return this;
+    }
+
+    public SelectBuilder noWait(){
+        if(!forUpdate){
+            throw new RuntimeException("ERROR : FOR UPDATE not Set");
+        }
+        noWait = true;
+        return this;
+    }
+
+    public SelectBuilder orderBy(String name){
+        orderBys.add(name);
+        return this;
+    }
+
+    public SelectBuilder orderBy(String name,boolean ascending){
+        if(ascending) orderBys.add(name + " asc");
+        else orderBys.add(name+" desc");
+        return this;
+    }
+
+    public String toString(){
+        StringBuilder sqlBuilder = new StringBuilder("SELECT ");
+
+        if(distinct){
+            sqlBuilder.append("DISTINCT ");
+        }
+
+        if(columns.size() == 0){
+            sqlBuilder.append("*");
+        }else{
+            appendData(sqlBuilder,columns,"",", ");
+        }
+
+        appendData(sqlBuilder,tables," FROM ",", ");
+        appendData(sqlBuilder,joins," JOIN "," JOIN ");
+        appendData(sqlBuilder,leftJoins," LEFT JOIN"," LEFT JOIN ");
+        appendData(sqlBuilder,wheres," WHERE "," AND ");
+        appendData(sqlBuilder,groupBys," GROUP BY ",", ");
+        appendData(sqlBuilder,havings," HAVING "," AND ");
+        appendData(sqlBuilder,unions," UNION ", " UNION ");
+        appendData(sqlBuilder,orderBys," ORDER BY ",", ");
+
+        if(forUpdate){
+            sqlBuilder.append(" FOR UPDATE ");
+            if(noWait){
+                sqlBuilder.append(" NOWAIT ");
+            }
+        }
+
+        if(limit>0){
+            sqlBuilder.append(" LIMIT "+limit);
+        }
+
+        if(offset > 0){
+            sqlBuilder.append(", "+offset);
+        }
+        return sqlBuilder.toString();
+    }
+
+    public SelectBuilder union(SelectBuilder union){
+        unions.add(union);
+        return this;
+    }
+    public SelectBuilder where(String expr){
+        wheres.add(expr);
         return this;
     }
 }

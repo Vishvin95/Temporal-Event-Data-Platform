@@ -1,4 +1,4 @@
-package persistence;
+package com.temporal.persistence;
 
 import java.util.List;
 

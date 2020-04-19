@@ -1,12 +1,14 @@
-package persistence;
+package com.temporal.persistence;
 
 public class SubSelectBuilder extends SelectBuilder {
 
     private String alias;
 
-    public SubSelectBuilder(String alias){
+    public SubSelectBuilder(SelectBuilder selectBuilder,String alias){
+        super(selectBuilder);
         this.alias = alias;
     }
+
     protected SubSelectBuilder(SubSelectBuilder subSelectBuilder){
         super(subSelectBuilder);
         this.alias = subSelectBuilder.alias;
@@ -20,7 +22,7 @@ public class SubSelectBuilder extends SelectBuilder {
     public String toString(){
         return "(" +
                 super.toString() +
-                ") as" +
+                ") as " +
                 alias;
     }
 }

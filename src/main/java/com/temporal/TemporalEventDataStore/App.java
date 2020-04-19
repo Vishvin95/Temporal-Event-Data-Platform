@@ -5,6 +5,8 @@ import java.io.FileNotFoundException;
 
 import javax.xml.bind.JAXBException;
 
+import com.temporal.persistence.SelectBuilder;
+import com.temporal.persistence.SubSelectBuilder;
 import org.xml.sax.SAXException;
 
 import com.temporal.model.Scenario;
@@ -16,5 +18,9 @@ public class App {
 
 		Scenario scenario = Scenario.loadFromXML(file);
 		scenario.printScenario();
+
+
+
+		
 	}
 }
