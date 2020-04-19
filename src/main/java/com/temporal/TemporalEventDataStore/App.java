@@ -44,11 +44,30 @@ public class App {
 
 		Scenario scenario1 = new Scenario.ScenarioBuilder("Company").addDomain(d1).addDomain(d2).addDomain(d3)
 				.addRelationship(r1).addRelationship(r2).build();
-		
+
 		System.out.println();
 		System.out.println("Manual Creation of Scenario");
 		System.out.println("---------------------------");
 		scenario1.printScenario();
+
+
+
+
+
+		//Sql builder example
+
+		SelectBuilder sb = new SelectBuilder()
+				.column("name")
+				.from("employee")
+				.where("age > 20")
+				.distinct();
+
+
+		SelectBuilder sb2 = new SelectBuilder()
+				.column("T.name")
+				.from(new SubSelectBuilder(sb,"T"));
+
+		System.out.println(sb2);
 
 	}
 }
