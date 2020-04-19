@@ -5,6 +5,7 @@ import java.io.FileNotFoundException;
 
 import javax.xml.bind.JAXBException;
 
+import com.temporal.persistence.InsertBuilder;
 import com.temporal.persistence.SelectBuilder;
 import com.temporal.persistence.SubSelectBuilder;
 import org.xml.sax.SAXException;
@@ -68,6 +69,12 @@ public class App {
 				.from(new SubSelectBuilder(sb,"T"));
 
 		System.out.println(sb2);
+
+
+		//Insert Builder
+		InsertBuilder ib = new InsertBuilder("employee").set("name","'Tarang'").set("age","4");
+
+		System.out.println(ib);
 
 	}
 }
