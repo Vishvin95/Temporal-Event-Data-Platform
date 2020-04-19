@@ -22,6 +22,18 @@ public class Scenario {
 	private ArrayList<Domain> domains;
 	private ArrayList<Relationship> relationships;
 	private String name;
+	
+	public Scenario()
+	{
+		
+	}
+	
+	private Scenario(ScenarioBuilder scenarioBuilder)
+	{
+		this.name = scenarioBuilder.name;
+		this.domains = scenarioBuilder.domains;
+		this.relationships = scenarioBuilder.relationships;
+	}
 
 	@XmlElementWrapper(name = "domains")
 	@XmlElement(name = "domain")
@@ -99,6 +111,44 @@ public class Scenario {
 		for (Relationship relationship : this.getRelationships()) {
 			System.out.println(relationship.getName());
 			System.out.println("  " + relationship);
+		}
+	}
+	
+	
+	public static class ScenarioBuilder
+	{
+		private ArrayList<Domain> domains;
+		private ArrayList<Relationship> relationships;
+		private final String name;
+		
+		public ScenarioBuilder(String name) {
+			this.name = name;
+			this.domains = new ArrayList<Domain>();
+			this.relationships = new ArrayList<Relationship>();
+		}
+		
+		public ScenarioBuilder addDomain(Domain domain)
+		{
+			domains.add(domain);
+			return this;
+		}
+		
+		public ScenarioBuilder addRelationship(Relationship relationship)
+		{
+			relationships.add(relationship);
+			return this;
+		}
+		
+		public Scenario build()
+		{
+			Scenario scenario = new Scenario(this);
+			validateScenario(scenario);
+			return scenario;
+		}
+		
+		private boolean validateScenario(Scenario scenario)
+		{
+			return true;
 		}
 	}
 }
