@@ -8,13 +8,11 @@ import javax.xml.bind.JAXBException;
 import org.xml.sax.SAXException;
 
 import com.temporal.model.Scenario;
+import com.temporal.query.Query;
 
 public class App {
 	public static void main(String[] args) throws FileNotFoundException, SAXException, JAXBException {
 
-		File file = new File("Scenario1.xml");
 
-		Scenario scenario = Scenario.loadFromXML(file);
-		scenario.printScenario();
 	}
 }
