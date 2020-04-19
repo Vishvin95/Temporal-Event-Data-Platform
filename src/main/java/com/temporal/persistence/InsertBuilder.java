@@ -27,7 +27,7 @@ public class InsertBuilder extends AbstractSqlBuilder {
     public String toString(){
         StringBuilder sqlBuilder = new StringBuilder("INSERT INTO ").append(table).append(" (");
         appendData(sqlBuilder,coloums,"",", ");
-        sqlBuilder.append(") values (");
+        sqlBuilder.append(") VALUES (");
         appendData(sqlBuilder,values,"",", ");
         sqlBuilder.append(")");
         return sqlBuilder.toString();
