@@ -13,7 +13,7 @@ import com.temporal.persistence.SubSelectBuilder;
 import org.xml.sax.SAXException;
 
 public class App {
-	public static void main(String[] args) throws SAXException, JAXBException{
+	public static void main(String[] args) throws SAXException, JAXBException {
 
 		//#5 : to avoid merge conflicts app file created for each module
 
