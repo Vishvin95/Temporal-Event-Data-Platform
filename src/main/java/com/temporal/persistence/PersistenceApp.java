@@ -22,5 +22,14 @@ public class PersistenceApp {
         InsertBuilder ib = new InsertBuilder("employee").set("name","'Tarang'").set("age","4");
 
         System.out.println(ib);
+
+        //CreateBuilder
+        CreateBuilder cb = new CreateBuilder().getDatabaseBuilder("zpro");
+
+        CreateBuilder.TableBuilder cbt = new CreateBuilder().getTableBuilder("zpro")
+                .addField(new Field("id", Field.Field_Type.VARCAHR).autoIncrement().primaryKey());
+
+
+        System.out.println(cbt);
     }
 }
