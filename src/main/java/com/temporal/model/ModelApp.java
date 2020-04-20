@@ -3,38 +3,76 @@ package com.temporal.model;
 import org.xml.sax.SAXException;
 
 import javax.xml.bind.JAXBException;
+import javax.xml.bind.UnmarshalException;
+
 import java.io.File;
 
 public class ModelApp {
-    public static void main(String... args) throws JAXBException, SAXException {
-        File file = new File("Scenario1.xml");
+	public static void main(String... args) throws JAXBException, SAXException {
 
-        System.out.println("XML creation of scenario");
-        System.out.println("------------------------");
-        Scenario scenario = Scenario.loadFromXML(file);
-        scenario.printScenario();
+		try {
+			File file = new File("Scenario1.xml");
+			System.out.println("XML creation of scenario");
+			System.out.println("------------------------");
+			Scenario scenario = Scenario.loadFromXML(file);
+			scenario.printScenario();
+		} catch (UnmarshalException unmarshalException) {
+			unmarshalException.printStackTrace();
+		} catch (InvalidScenarioException invalidScenarioException) {
+			invalidScenarioException.printStackTrace();
+		}
 
-        Event e1 = new Event("salary", EventDataType.DECIMAL, EventType.MOE);
-        Event e2 = new Event("empName", EventDataType.STRING, EventType.SOE);
-        Domain d1 = new Domain.DomainBuilder("employee").addEvent(e1).addEvent(e2).build();
+		try {
+			File validationFile = new File("Scenario2_validator.xml");
+			System.out.println("Check for validation of scenario");
+			System.out.println("--------------------------------");
+			Scenario validationScenario = Scenario.loadFromXML(validationFile);
+			validationScenario.printScenario();
+		} catch (UnmarshalException unmarshalException) {
+			/*
+			 * Validation cases handled by XSD: 
+			 * [1] At least one domain required 
+			 * [2] Unique domain name 
+			 * [3] Duplicate event in same domain 
+			 * [4] Relationships specified, but no relationship inside
+			 */
+			unmarshalException.printStackTrace();
+		} catch (InvalidScenarioException invalidScenarioException) {
+			/*
+			 * Validation cases handled by validate method:
+			 * [1] Duplicate Relationships throws DuplicateRelationshipException
+			 *		A B 11 and A B 11			
+			 * 		A B 11 and B A 11  
+			 * 		A B nn and B A nn
+			 * 		A B 1n and B A n1
+			 */
+			invalidScenarioException.printStackTrace();
+		}
 
-        Event e3 = new Event("dob", EventDataType.DECIMAL, EventType.SOE);
-        Event e4 = new Event("dependentName", EventDataType.STRING, EventType.SOE);
-        Domain d2 = new Domain.DomainBuilder("dependent").addEvent(e3).addEvent(e4).build();
+		Event e1 = new Event("salary", EventDataType.DECIMAL, EventType.MOE);
+		Event e2 = new Event("empName", EventDataType.STRING, EventType.SOE);
+		Domain d1 = new Domain.DomainBuilder("employee").addEvent(e1).addEvent(e2).build();
 
-        Event e5 = new Event("cost", EventDataType.DECIMAL, EventType.MOE);
-        Event e6 = new Event("projectName", EventDataType.STRING, EventType.SOE);
-        Domain d3 = new Domain.DomainBuilder("project").addEvent(e5).addEvent(e6).build();
+		Event e3 = new Event("dob", EventDataType.DECIMAL, EventType.SOE);
+		Event e4 = new Event("dependentName", EventDataType.STRING, EventType.SOE);
+		Domain d2 = new Domain.DomainBuilder("dependent").addEvent(e3).addEvent(e4).build();
 
-        Relationship r1 = new Relationship("works_on", RelationshipType.MANY_TO_MANY, d1, d3);
-        Relationship r2 = new Relationship("has", RelationshipType.ONE_TO_MANY, d1, d2);
+		Event e5 = new Event("cost", EventDataType.DECIMAL, EventType.MOE);
+		Event e6 = new Event("projectName", EventDataType.STRING, EventType.SOE);
+		Domain d3 = new Domain.DomainBuilder("project").addEvent(e5).addEvent(e6).build();
 
-        Scenario scenario1 = new Scenario.ScenarioBuilder("Company").addDomain(d1).addDomain(d2).addDomain(d3)
-                .addRelationship(r1).addRelationship(r2).build();
-
-        System.out.println();
-        System.out.println("Manual Creation of Scenario");
-        System.out.println("---------------------------");
-        scenario1.printScenario();
-    }
+		Relationship r1 = new Relationship("works_on", RelationshipType.MANY_TO_MANY, d1, d3);
+		Relationship r2 = new Relationship("has", RelationshipType.ONE_TO_MANY, d1, d2);
+		
+		try {
+			Scenario scenario1 = new Scenario.ScenarioBuilder("Company").addDomain(d1).addDomain(d2).addDomain(d3)
+					.addRelationship(r1).addRelationship(r2).build();
+			System.out.println();
+			System.out.println("Manual Creation of Scenario");
+			System.out.println("---------------------------");
+			scenario1.printScenario();
+		} catch (InvalidScenarioException invalidScenarioException) {
+			invalidScenarioException.printStackTrace();
+		}
+	}
 }

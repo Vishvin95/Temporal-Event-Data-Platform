@@ -46,6 +46,10 @@
 									</xs:sequence>
 									<xs:attribute name="name" type="xs:string" />
 								</xs:complexType>
+								<xs:key name="eventKey">
+									<xs:selector xpath="./event" />
+									<xs:field xpath="name" />
+								</xs:key>
 							</xs:element>
 						</xs:sequence>
 					</xs:complexType>
