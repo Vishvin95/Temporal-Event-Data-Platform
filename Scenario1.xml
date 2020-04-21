@@ -12,6 +12,8 @@
                 <name>salary</name>
                 <dataType>integer</dataType>
                 <type>MOE</type>
+                <notnull>true</notnull>
+                <unique>true</unique>
             </event>
         </domain>
         <domain name="project">
