@@ -1,6 +1,13 @@
 package com.temporal.persistence;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+import java.sql.*;
+import java.util.Properties;
+
 public class PersistenceApp {
+    public static Logger logger = LogManager.getLogger(PersistenceApp.class);
     public static void main(String... args){
         //Sql builder example
 
@@ -30,6 +37,18 @@ public class PersistenceApp {
                 .addField(new Field("id", Field.Field_Type.VARCAHR).autoIncrement().primaryKey());
 
 
-        System.out.println(cbt);
+
+
+        final Connection connection = GlobalConnection.getConnection();
+
+        try {
+            Statement statement = connection.createStatement();
+            ResultSet resultSet = statement.executeQuery("select *from ForeCast");
+            DBTablePrinter.printResultSet(resultSet);
+        } catch (SQLException e) {
+            logger.error(e);
+        }
+
+
     }
 }
