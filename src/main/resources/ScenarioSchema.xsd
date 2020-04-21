@@ -42,7 +42,7 @@
 														</xs:simpleType>
 													</xs:element>
 													<xs:element name="notnull" minOccurs="0" maxOccurs="1" type="xs:boolean" default="false"/>
-													<xs:element name="unique" minOccurs="0" maxOccurs="1" type="xs:boolean" default="true"/>		
+													<xs:element name="unique" minOccurs="0" maxOccurs="1" type="xs:boolean" default="false"/>		
 												</xs:sequence>
 											</xs:complexType>
 										</xs:element>
