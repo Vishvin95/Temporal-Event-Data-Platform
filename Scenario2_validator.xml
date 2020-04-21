@@ -12,8 +12,6 @@
                 <name>salary</name>
                 <dataType>integer</dataType>
                 <type>MOE</type>
-                <notnull>true</notnull>
-                <unique>true</unique>
             </event>
         </domain>
         <domain name="project">
@@ -42,6 +40,11 @@
         </domain>
     </domains>
     <relationships>
+        <relationship name="works_on">
+            <type>nn</type>
+            <from>employee</from>
+            <to>project</to>
+        </relationship>
         <relationship name="works_on">
             <type>nn</type>
             <from>employee</from>

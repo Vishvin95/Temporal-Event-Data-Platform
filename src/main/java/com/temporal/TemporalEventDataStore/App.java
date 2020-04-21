@@ -20,9 +20,9 @@ import com.temporal.query.Query;
 
 
 public class App {
-	public static void main(String[] args) throws FileNotFoundException, SAXException, JAXBException {
+	public static void main(String[] args) throws SAXException, JAXBException {
 
-		//#5 : Tarang to avoid merge conflicts app file created for each module
+		//#5 : to avoid merge conflicts app file created for each module
 
 		ModelApp.main();
 		PersistenceApp.main();
