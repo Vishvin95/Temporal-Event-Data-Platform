@@ -1,14 +1,19 @@
 package com.temporal.query;
 
+import com.temporal.model.Domain;
+import com.temporal.model.Event;
 import com.temporal.model.Scenario;
 import com.temporal.model.Relationship;
+import javafx.util.Pair;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
 
 public class Query {
 
-    public static HashMap<String,ArrayList<String>> get_Nx1_relationships(ArrayList<Relationship> relationships){
+    public static HashMap<String,ArrayList<String>> get_Relationships_Nx1(ArrayList<Relationship> relationships){
         HashMap<String,ArrayList<String>> Nx1_relationships=new HashMap<>();
         for(Relationship relationship:relationships)
         {
@@ -42,15 +47,154 @@ public class Query {
         return Nx1_relationships;
     }
 
+    public static HashMap<String,ArrayList<String>> get_Relationships_1x1(ArrayList<Relationship> relationships){
+        HashMap<String,ArrayList<String>> relationships_1x1=new HashMap<>();
+        for(Relationship relationship:relationships)
+        {
+            if(relationship.getType().compareTo("11")==0)
+            {
+                if(relationships_1x1.containsKey(relationship.getFrom()))
+                {
+                    relationships_1x1.get(relationship.getFrom()).add(relationship.getTo());
+                }
+                else
+                {
+                    ArrayList<String> temp=new ArrayList<>();
+                    temp.add(relationship.getTo());
+                    relationships_1x1.put(relationship.getFrom(),temp);
+                }
+            }
+        }
+        return relationships_1x1;
+    }
+
+    public static HashMap<String,ArrayList<String>> get_Relationships_NxN(ArrayList<Relationship> relationships,HashMap<String,HashMap<String,String>> relationship_Names){
+        HashMap<String,ArrayList<String>> relationships_NxN=new HashMap<>();
+        for(Relationship relationship:relationships)
+        {
+            if(relationship.getType().compareTo("nn")==0)
+            {
+                if(relationships_NxN.containsKey(relationship.getFrom()))
+                {
+                    relationships_NxN.get(relationship.getFrom()).add(relationship.getTo());
+                }
+                else
+                {
+                    ArrayList<String> temp=new ArrayList<>();
+                    temp.add(relationship.getTo());
+                    relationships_NxN.put(relationship.getFrom(),temp);
+                }
+                HashMap<String,String> temp =new HashMap<>();
+                temp.put(relationship.getTo(),relationship.getName());
+                relationship_Names.put(relationship.getFrom(),temp);
+            }
+        }
+        return relationships_NxN;
+    }
+
     public String CreateScenario(Scenario scenario){
         String query="";
+        String helperQuery="";
         String database_name=scenario.getName();
-        //
-        ArrayList<Relationship> relationships=scenario.getRelationships();
-        HashMap<String,ArrayList<String>> Nx1_Relationships= Query.get_Nx1_relationships(relationships);
+        query=query+"create database "+database_name+";"+"use "+database_name+";";
 
-        for(String s:Nx1_Relationships.keySet())
-            System.out.print(s);
+        ArrayList<Relationship> relationships=scenario.getRelationships();
+        HashMap<String,HashMap<String,String>> Relationship_Names=new HashMap<>();
+
+        HashMap<String,ArrayList<String>> Relationships_Nx1=Query.get_Relationships_Nx1(relationships);
+        HashMap<String,ArrayList<String>> Relationships_1x1=Query.get_Relationships_1x1(relationships);
+        HashMap<String,ArrayList<String>> Relationships_NxN=Query.get_Relationships_NxN(relationships,Relationship_Names);
+
+
+//        Iterator<Map.Entry<String, ArrayList<String>>> itr = Relationships_NxN.entrySet().iterator();
+//        while(itr.hasNext())
+//        {
+//            Map.Entry<String,ArrayList<String>> entry=itr.next();
+//            System.out.println(entry.getKey());
+//            ArrayList<String> temp=entry.getValue();
+//            for(String s:temp)
+//            {
+//                System.out.print(s);
+//            }
+//            System.out.println("------------");
+//        }
+
+        ArrayList<Domain> domains=scenario.getDomains();
+        for(Domain domain:domains)
+        {
+            ArrayList<Event> events= domain.getEvents();
+            int events_len=events.size();
+            query=query+"create table "+ domain.getname()+"("+"id INT AUTO_INCEMENT,PRIMARY KEY (id),";
+            for(int j=0;j<events_len-1;j++)
+            {
+                query = query+events.get(j).getname()+ " "+ events.get(j).getdataType()+ " "+ ",";
+                if(events.get(j).gettype().compareTo("MOE")==0)
+                {
+                   helperQuery=helperQuery+"create table "+ events.get(j).getname()+ "("+"value "+events.get(j).getdataType()+","+
+                           "valid_from DATETIME,valid_to DATETIME,trans_enter DATETIME,trans_delete DATETIME,"+
+                           "id int AUTO_INCREMENT,PRIMARY KEY(id),"+
+                           domain.getname()+"_id INT,"+"foreign key "+domain.getname()+"_id references "+
+                           domain.getname()+"(id)"+")"+ ";";
+                }
+            }
+            query=query+events.get(events_len-1).getname()+ " "+ events.get(events_len-1).getdataType()+ " ";
+
+            if(events.get(events_len-1).gettype().compareTo("MOE")==0)
+            {
+                helperQuery=helperQuery+"create table "+ events.get(events_len-1).getname()+ "("+"value "+events.get(events_len-1).getdataType()+","+
+                        "valid_from DATETIME,valid_to DATETIME,trans_enter DATETIME,trans_delete DATETIME,"+
+                        "id int AUTO_INCREMENT,PRIMARY KEY(id),"+
+                        domain.getname()+"_id INT,"+"foreign key "+domain.getname()+"_id references "+
+                        domain.getname()+"(id)"+")"+ ";";
+            }
+
+            if(Relationships_1x1.containsKey(domain.getname()))
+            {
+                query=query+",";
+                ArrayList<String> foreignKeys=Relationships_1x1.get(domain.getname());
+                int foreignKeys_len=foreignKeys.size();
+                for(int k=0;k<foreignKeys_len-1;k++)
+                {
+                    query=query+foreignKeys.get(k)+"_id INT,foreign key "+foreignKeys.get(k)+"_id references "+foreignKeys.get(k)+"(id),";
+                }
+                query=query+foreignKeys.get(foreignKeys_len-1)+"_id INT,foreign key "+foreignKeys.get(foreignKeys_len-1)+"_id references "+foreignKeys.get(foreignKeys_len-1)+"(id)";
+            }
+
+            if(Relationships_Nx1.containsKey(domain.getname()))
+            {
+                query=query+",";
+                ArrayList<String> foreignKeys=Relationships_Nx1.get(domain.getname());
+                int foreignKeys_len=foreignKeys.size();
+                for(int k=0;k<foreignKeys_len-1;k++)
+                {
+                    query=query+foreignKeys.get(k)+"_id INT,foreign key "+foreignKeys.get(k)+"_id references "+foreignKeys.get(k)+"(id),";
+                }
+                query=query+foreignKeys.get(foreignKeys_len-1)+"_id INT,foreign key "+foreignKeys.get(foreignKeys_len-1)+"_id references "+foreignKeys.get(foreignKeys_len-1)+"(id)";
+            }
+            query = query+");";
+        }
+
+        Iterator<Map.Entry<String, HashMap<String,String>>> parent = Relationship_Names.entrySet().iterator();
+
+        while (parent.hasNext())
+        {
+            Map.Entry<String, HashMap<String, String>> parentPair = parent.next();
+            Iterator<Map.Entry<String, String>> child = (parentPair.getValue()).entrySet().iterator();
+            while (child.hasNext())
+            {
+                Map.Entry childPair = child.next();
+                query=query+"create table "+childPair.getValue()+"("+
+                        parentPair.getKey()+"_id INT,"+childPair.getKey()+"_id INT,"+
+                        "foreign key "+parentPair.getKey()+"_id references "+parentPair.getKey()+"(id),"+
+                        "foreign key "+childPair.getKey()+"_id references "+childPair.getKey()+"(id),"+
+                        "PRIMARY KEY ("+parentPair.getKey()+"_id,"+childPair.getKey()+"_id)"+");";
+                //child.remove(); // avoids a ConcurrentModificationException
+            }
+        }
+
+
+        System.out.println(helperQuery);
+
 
         return query;
     }

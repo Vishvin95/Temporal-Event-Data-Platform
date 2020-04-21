@@ -12,14 +12,13 @@ import com.temporal.persistence.SelectBuilder;
 import com.temporal.persistence.SubSelectBuilder;
 import org.xml.sax.SAXException;
 
-<<<<<<< HEAD
+
 import com.temporal.model.Scenario;
 import com.temporal.query.Query;
 
-public class App {
-	public static void main(String[] args) throws FileNotFoundException, SAXException, JAXBException {
 
-=======
+
+
 public class App {
 	public static void main(String[] args) throws FileNotFoundException, SAXException, JAXBException {
 
@@ -31,7 +30,7 @@ public class App {
 
 
 
->>>>>>> 85b6461a5cea3f73334c6a0befeb4106ceb6bf3e
+
 
 	}
 }
