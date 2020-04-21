@@ -95,6 +95,7 @@ public class Query {
     public String CreateScenario(Scenario scenario){
         String query="";
         String helperQuery="";
+        String temporalQuery="create table temporal_info(moe_name VARCHAR(50) ,base_store VARCHAR(50),id INT AUTO_INCEMENT,PRIMARY KEY (id));";
         String database_name=scenario.getName();
         query=query+"create database "+database_name+";"+"use "+database_name+";";
 
@@ -127,25 +128,30 @@ public class Query {
             query=query+"create table "+ domain.getname()+"("+"id INT AUTO_INCEMENT,PRIMARY KEY (id),";
             for(int j=0;j<events_len-1;j++)
             {
-                query = query+events.get(j).getname()+ " "+ events.get(j).getdataType()+ " "+ ",";
-                if(events.get(j).gettype().compareTo("MOE")==0)
+                query = query+events.get(j).getName()+ " "+ events.get(j).getDataType()+ " "+ ",";
+                if(events.get(j).getType().compareTo("MOE")==0)
                 {
-                   helperQuery=helperQuery+"create table "+ events.get(j).getname()+ "("+"value "+events.get(j).getdataType()+","+
+                   helperQuery=helperQuery+"create table "+ events.get(j).getName()+ "("+"value "+events.get(j).getDataType()+","+
                            "valid_from DATETIME,valid_to DATETIME,trans_enter DATETIME,trans_delete DATETIME,"+
                            "id int AUTO_INCREMENT,PRIMARY KEY(id),"+
                            domain.getname()+"_id INT,"+"foreign key "+domain.getname()+"_id references "+
                            domain.getname()+"(id)"+")"+ ";";
+                   temporalQuery=temporalQuery+"INSERT INTO temporal_info(moe_name,base_store) VALUES("+
+                           events.get(j).getName()+","+domain.getname()+");";
                 }
             }
-            query=query+events.get(events_len-1).getname()+ " "+ events.get(events_len-1).getdataType()+ " ";
+            query=query+events.get(events_len-1).getName()+ " "+ events.get(events_len-1).getDataType()+ " ";
 
-            if(events.get(events_len-1).gettype().compareTo("MOE")==0)
+            if(events.get(events_len-1).getType().compareTo("MOE")==0)
             {
-                helperQuery=helperQuery+"create table "+ events.get(events_len-1).getname()+ "("+"value "+events.get(events_len-1).getdataType()+","+
+                helperQuery=helperQuery+"create table "+ events.get(events_len-1).getName()+ "("+"value "+events.get(events_len-1).getDataType()+","+
                         "valid_from DATETIME,valid_to DATETIME,trans_enter DATETIME,trans_delete DATETIME,"+
                         "id int AUTO_INCREMENT,PRIMARY KEY(id),"+
                         domain.getname()+"_id INT,"+"foreign key "+domain.getname()+"_id references "+
                         domain.getname()+"(id)"+")"+ ";";
+
+                temporalQuery=temporalQuery+"INSERT INTO temporal_info(moe_name,base_store) VALUES("+
+                        events.get(events_len-1).getName()+","+domain.getname()+");";
             }
 
             if(Relationships_1x1.containsKey(domain.getname()))
@@ -192,9 +198,9 @@ public class Query {
             }
         }
 
-
+        System.out.println(temporalQuery);
         System.out.println(helperQuery);
-
+        // hashcodes,1xN:Nx1,atrributes
 
         return query;
     }
