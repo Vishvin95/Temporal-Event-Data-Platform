@@ -13,6 +13,10 @@ import java.util.Map;
 
 public class Query {
 
+    public static boolean isNxN_Relation(){
+        return true;
+    }
+
     public static HashMap<String,ArrayList<String>> get_Relationships_Nx1(ArrayList<Relationship> relationships){
         HashMap<String,ArrayList<String>> Nx1_relationships=new HashMap<>();
         for(Relationship relationship:relationships)
@@ -53,6 +57,7 @@ public class Query {
         {
             if(relationship.getType().compareTo("11")==0)
             {
+
                 if(relationships_1x1.containsKey(relationship.getFrom()))
                 {
                     relationships_1x1.get(relationship.getFrom()).add(relationship.getTo());
@@ -105,7 +110,7 @@ public class Query {
 
         String query="";
         String helperQuery="";
-        String temporalQuery="create table temporal_info(moe_name VARCHAR(50) ,base_store VARCHAR(50),id INT NOT NULL AUTO_INCEMENT,PRIMARY KEY (id));";
+        String temporalQuery="create table temporal_info(moe_name VARCHAR(50) ,base_store VARCHAR(50),id INT NOT NULL AUTO_INCREMENT,PRIMARY KEY (id));";
         String database_name=scenario.getName();
         query=query+"create database "+database_name+";"+"use "+database_name+";";
 
@@ -162,7 +167,7 @@ public class Query {
                         domain.getname()+"(id)"+")"+ ";";
 
                 temporalQuery=temporalQuery+"INSERT INTO temporal_info(moe_name,base_store) VALUES("+
-                        events.get(events_len-1).getName()+","+domain.getname()+");";
+                        '"'+events.get(events_len-1).getName()+'"'+","+'"'+domain.getname()+'"'+");";
             }
 
             if(Relationships_1x1.containsKey(domain.getname()))
@@ -208,10 +213,6 @@ public class Query {
                 //child.remove(); // avoids a ConcurrentModificationException
             }
         }
-
-        System.out.println(temporalQuery);
-        System.out.println(helperQuery);
-        // hashcodes,1xN:Nx1,atrributes
 
         return query+helperQuery+temporalQuery;
     }
