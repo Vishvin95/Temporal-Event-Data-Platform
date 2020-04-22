@@ -13,7 +13,6 @@ public class Test {
         File file = new File("Scenario1.xml");
         Scenario scenario = Scenario.loadFromXML(file);
         scenario.printScenario();
-        //System.out.println("------");
         Query q=new Query();
         String s=q.CreateScenario(scenario);
         System.out.println(s);

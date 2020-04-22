@@ -12,24 +12,14 @@ import java.util.Map;
 
 public class Query {
 
-    public static HashMap<String,ArrayList<String>> get_Relationships_Nx1(ArrayList<Relationship> relationships){
+    /*
+    RETURNS THE HASHMAP OF 1:N RELATIONSHIPS
+     */
+    public static HashMap<String,ArrayList<String>> get_Relationships_Nx1(ArrayList<Relationship> relationships,HashMap<String,ArrayList<String>> relationships_NxN){
         HashMap<String,ArrayList<String>> Nx1_relationships=new HashMap<>();
         for(Relationship relationship:relationships)
         {
-            if(relationship.getType().compareTo("n1")==0)
-            {
-                if(Nx1_relationships.containsKey(relationship.getFrom()))
-                {
-                    Nx1_relationships.get(relationship.getFrom()).add(relationship.getTo());
-                }
-                else
-                {
-                    ArrayList<String> temp=new ArrayList<>();
-                    temp.add(relationship.getTo());
-                    Nx1_relationships.put(relationship.getFrom(),temp);
-                }
-            }
-            else if(relationship.getType().compareTo("1n")==0)
+            if(relationship.getType().compareTo("1n")==0)
             {
                 if(Nx1_relationships.containsKey(relationship.getTo()))
                 {
@@ -46,7 +36,7 @@ public class Query {
         return Nx1_relationships;
     }
 
-    /*
+    /*HashMap<String,ArrayList<String>> Relationships_NxN
      RETURNS THE HASHMAP OF 1:1 RELATIONSHIPS
      */
     public static HashMap<String,ArrayList<String>> get_Relationships_1x1(ArrayList<Relationship> relationships){
@@ -98,6 +88,9 @@ public class Query {
         return relationships_NxN;
     }
 
+    /*
+
+     */
     public String CreateScenario(Scenario scenario){
         /*
           HASHMAP FOR DATATYPE RESOLVING
@@ -113,72 +106,80 @@ public class Query {
 
         String query="";
         String helperQuery="";
-        String temporalQuery="create table temporal_info(moe_name VARCHAR(50) ,base_store VARCHAR(50),id INT NOT NULL AUTO_INCREMENT,PRIMARY KEY (id));";
+        String temporalQuery="create table moe(moe_name VARCHAR(50) ,base_store VARCHAR(50),id INT NOT NULL AUTO_INCREMENT,PRIMARY KEY (id));";
         String database_name=scenario.getName();
         query=query+"create database "+database_name+";"+"use "+database_name+";";
 
         ArrayList<Relationship> relationships=scenario.getRelationships();
         HashMap<String,HashMap<String,String>> Relationship_Names=new HashMap<>();
 
-        HashMap<String,ArrayList<String>> Relationships_Nx1=Query.get_Relationships_Nx1(relationships);
-        HashMap<String,ArrayList<String>> Relationships_1x1=Query.get_Relationships_1x1(relationships);
         HashMap<String,ArrayList<String>> Relationships_NxN=Query.get_Relationships_NxN(relationships,Relationship_Names);
+        HashMap<String,ArrayList<String>> Relationships_Nx1=Query.get_Relationships_Nx1(relationships,Relationships_NxN);
+        HashMap<String,ArrayList<String>> Relationships_1x1=Query.get_Relationships_1x1(relationships);
+
 
         ArrayList<Domain> domains=scenario.getDomains();
         for(Domain domain:domains)
         {
             ArrayList<Event> events= domain.getEvents();
             int events_len=events.size();
-            query=query+"create table "+ domain.getname()+"("+"id INT NOT NULL AUTO_INCREMENT,PRIMARY KEY (id),";
+            query=query+"create table "+ domain.getname()+"("+"id INT NOT NULL AUTO_INCREMENT,PRIMARY KEY (id)";
             for(int j=0;j<events_len-1;j++)
             {
-                query = query+events.get(j).getName()+ " "+ dataType_Resolver.get(events.get(j).getDataType())+ " ";
-
-                if (events.get(j).isNotNull())
-                {
-                    query=query+"NOT NULL ";
-                }
-                if (events.get(j).isUnique())
-                {
-                    query=query+"UNIQUE";
-                }
-
-                query=query+",";
-
                 if(events.get(j).getType().compareTo("MOE")==0)
                 {
-                   helperQuery=helperQuery+"create table "+ events.get(j).getName()+ "("+"value "+dataType_Resolver.get(events.get(j).getDataType())+","+
+                   helperQuery=helperQuery+"create table moe_"+domain.getname()+"_"+ events.get(j).getName()+ "("+"value "+dataType_Resolver.get(events.get(j).getDataType())+","+
                            "valid_from DATETIME,valid_to DATETIME,trans_enter DATETIME,trans_delete DATETIME,"+
                            "id int AUTO_INCREMENT,PRIMARY KEY(id),"+
                            domain.getname()+"_id INT,"+"foreign key ("+domain.getname()+"_id) references "+
                            domain.getname()+"(id)"+")"+ ";";
-                   temporalQuery=temporalQuery+"INSERT INTO temporal_info(moe_name,base_store) VALUES("+
+                   temporalQuery=temporalQuery+"INSERT INTO moe(moe_name,base_store) VALUES("+
                            '"'+events.get(j).getName()+'"'+","+'"'+domain.getname()+'"'+");";
 
                 }
-            }
-            query=query+events.get(events_len-1).getName()+ " "+ dataType_Resolver.get(events.get(events_len-1).getDataType())+" ";
+                else
+                {
+                    query=query+",";
+                    query = query+events.get(j).getName()+ " "+ dataType_Resolver.get(events.get(j).getDataType())+ " ";
 
-            if (events.get(events_len-1).isNotNull())
-            {
-                query=query+"NOT NULL ";
-            }
-            if (events.get(events_len-1).isUnique())
-            {
-                query=query+"UNIQUE";
+                    if (events.get(j).isNotNull())
+                    {
+                        query=query+"NOT NULL ";
+                    }
+                    if (events.get(j).isUnique())
+                    {
+                        query=query+"UNIQUE";
+                    }
+
+                }
             }
 
             if(events.get(events_len-1).getType().compareTo("MOE")==0)
             {
-                helperQuery=helperQuery+"create table "+ events.get(events_len-1).getName()+ "("+"value "+dataType_Resolver.get(events.get(events_len-1).getDataType())+","+
+                helperQuery=helperQuery+"create table moe_"+domain.getname()+"_"+events.get(events_len-1).getName()+ "("+"value "+dataType_Resolver.get(events.get(events_len-1).getDataType())+","+
                         "valid_from DATETIME,valid_to DATETIME,trans_enter DATETIME,trans_delete DATETIME,"+
                         "id int AUTO_INCREMENT,PRIMARY KEY(id),"+
                         domain.getname()+"_id INT,"+"foreign key ("+domain.getname()+"_id) references "+
                         domain.getname()+"(id)"+")"+ ";";
 
-                temporalQuery=temporalQuery+"INSERT INTO temporal_info(moe_name,base_store) VALUES("+
+                temporalQuery=temporalQuery+"INSERT INTO moe(moe_name,base_store) VALUES("+
                         '"'+events.get(events_len-1).getName()+'"'+","+'"'+domain.getname()+'"'+");";
             }
+            else
+            {
+                query=query+",";
+                query=query+events.get(events_len-1).getName()+ " "+ dataType_Resolver.get(events.get(events_len-1).getDataType())+" ";
+
+                if (events.get(events_len-1).isNotNull())
+                {
+                    query=query+"NOT NULL ";
+                }
+                if (events.get(events_len-1).isUnique())
+                {
+                    query=query+"UNIQUE";
+                }
+            }
+
 
             if(Relationships_1x1.containsKey(domain.getname()))
             {
