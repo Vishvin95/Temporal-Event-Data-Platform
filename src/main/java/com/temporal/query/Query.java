@@ -4,7 +4,6 @@ import com.temporal.model.Domain;
 import com.temporal.model.Event;
 import com.temporal.model.Scenario;
 import com.temporal.model.Relationship;
-import javafx.util.Pair;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -12,10 +11,6 @@ import java.util.Iterator;
 import java.util.Map;
 
 public class Query {
-
-    public static boolean isNxN_Relation(){
-        return true;
-    }
 
     public static HashMap<String,ArrayList<String>> get_Relationships_Nx1(ArrayList<Relationship> relationships){
         HashMap<String,ArrayList<String>> Nx1_relationships=new HashMap<>();
@@ -51,6 +46,9 @@ public class Query {
         return Nx1_relationships;
     }
 
+    /*
+     RETURNS THE HASHMAP OF 1:1 RELATIONSHIPS
+     */
     public static HashMap<String,ArrayList<String>> get_Relationships_1x1(ArrayList<Relationship> relationships){
         HashMap<String,ArrayList<String>> relationships_1x1=new HashMap<>();
         for(Relationship relationship:relationships)
@@ -73,6 +71,9 @@ public class Query {
         return relationships_1x1;
     }
 
+    /*
+     RETURNS THE HASHMAP OF N:N RELATIONSHIPS
+     */
     public static HashMap<String,ArrayList<String>> get_Relationships_NxN(ArrayList<Relationship> relationships,HashMap<String,HashMap<String,String>> relationship_Names){
         HashMap<String,ArrayList<String>> relationships_NxN=new HashMap<>();
         for(Relationship relationship:relationships)
@@ -98,7 +99,9 @@ public class Query {
     }
 
     public String CreateScenario(Scenario scenario){
-
+        /*
+          HASHMAP FOR DATATYPE RESOLVING
+        */
         HashMap<String,String> dataType_Resolver=new HashMap<>();
         dataType_Resolver.put("string","VARCHAR(50)");
         dataType_Resolver.put("integer","INT");
@@ -121,20 +124,6 @@ public class Query {
         HashMap<String,ArrayList<String>> Relationships_1x1=Query.get_Relationships_1x1(relationships);
         HashMap<String,ArrayList<String>> Relationships_NxN=Query.get_Relationships_NxN(relationships,Relationship_Names);
 
-
-//        Iterator<Map.Entry<String, ArrayList<String>>> itr = Relationships_NxN.entrySet().iterator();
-//        while(itr.hasNext())
-//        {
-//            Map.Entry<String,ArrayList<String>> entry=itr.next();
-//            System.out.println(entry.getKey());
-//            ArrayList<String> temp=entry.getValue();
-//            for(String s:temp)
-//            {
-//                System.out.print(s);
-//            }
-//            System.out.println("------------");
-//        }
-
         ArrayList<Domain> domains=scenario.getDomains();
         for(Domain domain:domains)
         {
@@ -143,7 +132,19 @@ public class Query {
             query=query+"create table "+ domain.getname()+"("+"id INT NOT NULL AUTO_INCREMENT,PRIMARY KEY (id),";
             for(int j=0;j<events_len-1;j++)
             {
-                query = query+events.get(j).getName()+ " "+ dataType_Resolver.get(events.get(j).getDataType())+ " "+ ",";
+                query = query+events.get(j).getName()+ " "+ dataType_Resolver.get(events.get(j).getDataType())+ " ";
+
+                if (events.get(j).isNotNull())
+                {
+                    query=query+"NOT NULL ";
+                }
+                if (events.get(j).isUnique())
+                {
+                    query=query+"UNIQUE";
+                }
+
+                query=query+",";
+
                 if(events.get(j).getType().compareTo("MOE")==0)
                 {
                    helperQuery=helperQuery+"create table "+ events.get(j).getName()+ "("+"value "+dataType_Resolver.get(events.get(j).getDataType())+","+
@@ -156,7 +157,16 @@ public class Query {
 
                 }
             }
-            query=query+events.get(events_len-1).getName()+ " "+ dataType_Resolver.get(events.get(events_len-1).getDataType())+ " ";
+            query=query+events.get(events_len-1).getName()+ " "+ dataType_Resolver.get(events.get(events_len-1).getDataType())+" ";
+
+            if (events.get(events_len-1).isNotNull())
+            {
+                query=query+"NOT NULL ";
+            }
+            if (events.get(events_len-1).isUnique())
+            {
+                query=query+"UNIQUE";
+            }
 
             if(events.get(events_len-1).getType().compareTo("MOE")==0)
             {
