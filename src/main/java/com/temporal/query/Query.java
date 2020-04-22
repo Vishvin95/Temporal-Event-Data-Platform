@@ -93,9 +93,19 @@ public class Query {
     }
 
     public String CreateScenario(Scenario scenario){
+
+        HashMap<String,String> dataType_Resolver=new HashMap<>();
+        dataType_Resolver.put("string","VARCHAR(50)");
+        dataType_Resolver.put("integer","INT");
+        dataType_Resolver.put("long","BIGINT");
+        dataType_Resolver.put("date","DATE");
+        dataType_Resolver.put("datetime","DATETIME");
+        dataType_Resolver.put("decimal","DECIMAL(16,4)");
+        dataType_Resolver.put("boolean","BOOLEAN");
+
         String query="";
         String helperQuery="";
-        String temporalQuery="create table temporal_info(moe_name VARCHAR(50) ,base_store VARCHAR(50),id INT AUTO_INCEMENT,PRIMARY KEY (id));";
+        String temporalQuery="create table temporal_info(moe_name VARCHAR(50) ,base_store VARCHAR(50),id INT NOT NULL AUTO_INCEMENT,PRIMARY KEY (id));";
         String database_name=scenario.getName();
         query=query+"create database "+database_name+";"+"use "+database_name+";";
 
@@ -125,29 +135,30 @@ public class Query {
         {
             ArrayList<Event> events= domain.getEvents();
             int events_len=events.size();
-            query=query+"create table "+ domain.getname()+"("+"id INT AUTO_INCEMENT,PRIMARY KEY (id),";
+            query=query+"create table "+ domain.getname()+"("+"id INT NOT NULL AUTO_INCREMENT,PRIMARY KEY (id),";
             for(int j=0;j<events_len-1;j++)
             {
-                query = query+events.get(j).getName()+ " "+ events.get(j).getDataType()+ " "+ ",";
+                query = query+events.get(j).getName()+ " "+ dataType_Resolver.get(events.get(j).getDataType())+ " "+ ",";
                 if(events.get(j).getType().compareTo("MOE")==0)
                 {
-                   helperQuery=helperQuery+"create table "+ events.get(j).getName()+ "("+"value "+events.get(j).getDataType()+","+
+                   helperQuery=helperQuery+"create table "+ events.get(j).getName()+ "("+"value "+dataType_Resolver.get(events.get(j).getDataType())+","+
                            "valid_from DATETIME,valid_to DATETIME,trans_enter DATETIME,trans_delete DATETIME,"+
                            "id int AUTO_INCREMENT,PRIMARY KEY(id),"+
-                           domain.getname()+"_id INT,"+"foreign key "+domain.getname()+"_id references "+
+                           domain.getname()+"_id INT,"+"foreign key ("+domain.getname()+"_id) references "+
                            domain.getname()+"(id)"+")"+ ";";
                    temporalQuery=temporalQuery+"INSERT INTO temporal_info(moe_name,base_store) VALUES("+
-                           events.get(j).getName()+","+domain.getname()+");";
+                           '"'+events.get(j).getName()+'"'+","+'"'+domain.getname()+'"'+");";
+
                 }
             }
-            query=query+events.get(events_len-1).getName()+ " "+ events.get(events_len-1).getDataType()+ " ";
+            query=query+events.get(events_len-1).getName()+ " "+ dataType_Resolver.get(events.get(events_len-1).getDataType())+ " ";
 
             if(events.get(events_len-1).getType().compareTo("MOE")==0)
             {
-                helperQuery=helperQuery+"create table "+ events.get(events_len-1).getName()+ "("+"value "+events.get(events_len-1).getDataType()+","+
+                helperQuery=helperQuery+"create table "+ events.get(events_len-1).getName()+ "("+"value "+dataType_Resolver.get(events.get(events_len-1).getDataType())+","+
                         "valid_from DATETIME,valid_to DATETIME,trans_enter DATETIME,trans_delete DATETIME,"+
                         "id int AUTO_INCREMENT,PRIMARY KEY(id),"+
-                        domain.getname()+"_id INT,"+"foreign key "+domain.getname()+"_id references "+
+                        domain.getname()+"_id INT,"+"foreign key ("+domain.getname()+"_id) references "+
                         domain.getname()+"(id)"+")"+ ";";
 
                 temporalQuery=temporalQuery+"INSERT INTO temporal_info(moe_name,base_store) VALUES("+
@@ -161,9 +172,9 @@ public class Query {
                 int foreignKeys_len=foreignKeys.size();
                 for(int k=0;k<foreignKeys_len-1;k++)
                 {
-                    query=query+foreignKeys.get(k)+"_id INT,foreign key "+foreignKeys.get(k)+"_id references "+foreignKeys.get(k)+"(id),";
+                    query=query+foreignKeys.get(k)+"_id INT,foreign key ("+foreignKeys.get(k)+"_id) references "+foreignKeys.get(k)+"(id),";
                 }
-                query=query+foreignKeys.get(foreignKeys_len-1)+"_id INT,foreign key "+foreignKeys.get(foreignKeys_len-1)+"_id references "+foreignKeys.get(foreignKeys_len-1)+"(id)";
+                query=query+foreignKeys.get(foreignKeys_len-1)+"_id INT,foreign key ("+foreignKeys.get(foreignKeys_len-1)+"_id) references "+foreignKeys.get(foreignKeys_len-1)+"(id)";
             }
 
             if(Relationships_Nx1.containsKey(domain.getname()))
@@ -173,9 +184,9 @@ public class Query {
                 int foreignKeys_len=foreignKeys.size();
                 for(int k=0;k<foreignKeys_len-1;k++)
                 {
-                    query=query+foreignKeys.get(k)+"_id INT,foreign key "+foreignKeys.get(k)+"_id references "+foreignKeys.get(k)+"(id),";
+                    query=query+foreignKeys.get(k)+"_id INT,foreign key ("+foreignKeys.get(k)+"_id) references "+foreignKeys.get(k)+"(id),";
                 }
-                query=query+foreignKeys.get(foreignKeys_len-1)+"_id INT,foreign key "+foreignKeys.get(foreignKeys_len-1)+"_id references "+foreignKeys.get(foreignKeys_len-1)+"(id)";
+                query=query+foreignKeys.get(foreignKeys_len-1)+"_id INT,foreign key ("+foreignKeys.get(foreignKeys_len-1)+"_id) references "+foreignKeys.get(foreignKeys_len-1)+"(id)";
             }
             query = query+");";
         }
@@ -191,8 +202,8 @@ public class Query {
                 Map.Entry childPair = child.next();
                 query=query+"create table "+childPair.getValue()+"("+
                         parentPair.getKey()+"_id INT,"+childPair.getKey()+"_id INT,"+
-                        "foreign key "+parentPair.getKey()+"_id references "+parentPair.getKey()+"(id),"+
-                        "foreign key "+childPair.getKey()+"_id references "+childPair.getKey()+"(id),"+
+                        "foreign key ("+parentPair.getKey()+"_id) references "+parentPair.getKey()+"(id),"+
+                        "foreign key ("+childPair.getKey()+"_id) references "+childPair.getKey()+"(id),"+
                         "PRIMARY KEY ("+parentPair.getKey()+"_id,"+childPair.getKey()+"_id)"+");";
                 //child.remove(); // avoids a ConcurrentModificationException
             }
@@ -202,6 +213,6 @@ public class Query {
         System.out.println(helperQuery);
         // hashcodes,1xN:Nx1,atrributes
 
-        return query;
+        return query+helperQuery+temporalQuery;
     }
 }
