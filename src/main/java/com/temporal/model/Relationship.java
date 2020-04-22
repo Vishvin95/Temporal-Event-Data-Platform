@@ -91,14 +91,6 @@ public class Relationship {
 						&& (r.getType().equals(RelationshipType.ONE_TO_ONE.getRelationshipType())
 								|| r.getType().equals(RelationshipType.MANY_TO_MANY.getRelationshipType()))
 						&& r.getFrom().equals(this.to)) && r.getTo().equals(this.from))
-				
-				// A B 1n and B A n1, then duplicate
-				|| (r.getFrom().equals(this.to) && r.getTo().equals(this.from)
-						&& ((r.getType().equals(RelationshipType.ONE_TO_MANY.getRelationshipType())
-								&& this.getType().equals(RelationshipType.MANY_TO_ONE.getRelationshipType())) ||
-
-								(r.getType().equals(RelationshipType.MANY_TO_ONE.getRelationshipType())
-										&& this.getType().equals(RelationshipType.ONE_TO_MANY.getRelationshipType()))))
 			)
 			return true;
 		else
