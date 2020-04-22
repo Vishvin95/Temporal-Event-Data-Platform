@@ -70,7 +70,6 @@
 												<xs:restriction base="xs:string">
 													<xs:enumeration value="11" />
 													<xs:enumeration value="1n" />
-													<xs:enumeration value="n1" />
 													<xs:enumeration value="nn" />
 												</xs:restriction>
 											</xs:simpleType>

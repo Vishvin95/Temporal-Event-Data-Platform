@@ -44,7 +44,6 @@ public class ModelApp {
 			 *		A B 11 and A B 11			
 			 * 		A B 11 and B A 11  
 			 * 		A B nn and B A nn
-			 * 		A B 1n and B A n1
 			 */
 			invalidScenarioException.printStackTrace();
 		}
