@@ -5,7 +5,6 @@ import javax.xml.bind.annotation.XmlElement;
 public class Event {
 	private String name;
 	private String dataType;
-	private String type;
 	private boolean notNull;
 	private boolean unique;
 
@@ -19,12 +18,10 @@ public class Event {
 	 *                 EventDataType.BOOLEAN, EventDataType.DECIMAL,
 	 *                 EventDataType.INTEGER, EventDataType.LONG, EventDataType.DATE,
 	 *                 EventDataType.DATE_TIME
-	 * @param type     : Is it a single occurrence event ( EventType.SOE ) or multi occurrence event ( EventType.MOE ) 
 	 */
-	public Event(String name, EventDataType dataType, EventType type, boolean notNull, boolean unique) {
+	public Event(String name, EventDataType dataType, boolean notNull, boolean unique) {
 		this.name = name;
 		this.dataType = dataType.getEventDataType();
-		this.type = type.getEventType();
 		this.notNull = notNull;
 		this.unique = unique;
 	}
@@ -43,14 +40,6 @@ public class Event {
 
 	public void setDataType(String dataType) {
 		this.dataType = dataType;
-	}
-
-	public String getType() {
-		return type;
-	}
-
-	public void setType(String type) {
-		this.type = type;
 	}
 	
 	@XmlElement(name = "notnull")
@@ -75,7 +64,7 @@ public class Event {
 	@Override
 	public String toString() {
 		String eventString;
-		eventString = "\t" + name + "\t" + dataType + "\t" + type;
+		eventString = "\t" + name + "\t" + dataType;
 		if(this.notNull)
 			eventString = eventString + "\tnot_null";
 		if(this.unique)

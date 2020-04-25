@@ -48,17 +48,17 @@ public class ModelApp {
 			invalidScenarioException.printStackTrace();
 		}
 
-		Event e1 = new Event("salary", EventDataType.DECIMAL, EventType.MOE,true,false);
-		Event e2 = new Event("empName", EventDataType.STRING, EventType.SOE,true,false);
-		Domain d1 = new Domain.DomainBuilder("employee").addEvent(e1).addEvent(e2).build();
+		Event e1 = new Event("salary", EventDataType.DECIMAL,true,false);
+		Event e2 = new Event("empName", EventDataType.STRING,true,false);
+		Domain d1 = new Domain.DomainBuilder("employee",false).addEvent(e1).addEvent(e2).build();
 
-		Event e3 = new Event("dob", EventDataType.DECIMAL, EventType.SOE,false,false);
-		Event e4 = new Event("dependentName", EventDataType.STRING, EventType.SOE,true,false);
-		Domain d2 = new Domain.DomainBuilder("dependent").addEvent(e3).addEvent(e4).build();
+		Event e3 = new Event("dob", EventDataType.DECIMAL,false,false);
+		Event e4 = new Event("dependentName", EventDataType.STRING,true,false);
+		Domain d2 = new Domain.DomainBuilder("dependent",false).addEvent(e3).addEvent(e4).build();
 
-		Event e5 = new Event("cost", EventDataType.DECIMAL, EventType.MOE,true,false);
-		Event e6 = new Event("projectName", EventDataType.STRING, EventType.SOE,true,false);
-		Domain d3 = new Domain.DomainBuilder("project").addEvent(e5).addEvent(e6).build();
+		Event e5 = new Event("cost", EventDataType.DECIMAL,true,false);
+		Event e6 = new Event("projectName", EventDataType.STRING,true,false);
+		Domain d3 = new Domain.DomainBuilder("project",false).addEvent(e5).addEvent(e6).build();
 
 		Relationship r1 = new Relationship("works_on", RelationshipType.MANY_TO_MANY, d1, d3);
 		Relationship r2 = new Relationship("has", RelationshipType.ONE_TO_MANY, d1, d2);

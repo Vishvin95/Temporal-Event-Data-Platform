@@ -120,7 +120,8 @@ public class Scenario {
 		System.out.println();
 		System.out.println("Tables:");
 		for (Domain domain : this.getDomains()) {
-			System.out.println("  " + domain.getname());
+			System.out.println("  " + domain.getName());
+			System.out.println("  Temporal: " + domain.isTemporal());
 			ArrayList<Event> el = domain.getEvents();
 
 			for (Event event : el) {

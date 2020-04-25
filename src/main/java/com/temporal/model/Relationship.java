@@ -24,8 +24,8 @@ public class Relationship {
 	public Relationship(String name, RelationshipType type, Domain from, Domain to) {
 		this.name = name;
 		this.type = type.getRelationshipType();
-		this.from = from.getname();
-		this.to = to.getname();
+		this.from = from.getName();
+		this.to = to.getName();
 	}
 	
 	Relationship(String name, RelationshipType type, String from, String to) {
