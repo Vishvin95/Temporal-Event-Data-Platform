@@ -121,6 +121,7 @@ public class CreateQuery {
         }
 
         String query="";
+        String helperQuery="";
         String temporalQuery="";
         String database_name=scenario.getName();
         query=query+"create database "+database_name+";"+"use "+database_name+";";
@@ -140,8 +141,7 @@ public class CreateQuery {
             String temp2="";
             String temp="";
             temp1=temp1+"create table "+ domain.getName()+"("+"id INT NOT NULL AUTO_INCREMENT,PRIMARY KEY (id)";
-            temp2=temp2+"create table "+ domain.getName()+"_hist("+"id INT NOT NULL AUTO_INCREMENT,PRIMARY KEY (id),"
-                        +domain.getName()+"_id INT,foreign key ("+domain.getName()+"_id) references "+domain.getName()+"(id)";
+            temp2=temp2+"create table "+ domain.getName()+"_hist("+domain.getName()+"_id INT";
             ArrayList<Event> events= domain.getEvents();
             int events_len=events.size();
             for(Event event:events)
@@ -159,12 +159,12 @@ public class CreateQuery {
 
             if(domain.isTemporal())
             {
-                temporalQuery=temporalQuery+temp2+temp+",valid_from DATETIME,valid_to DATETIME,trans_enter DATETIME,trans_delete DATETIME);";
+                temporalQuery=temporalQuery+temp2+temp+",valid_from DATETIME,valid_to DATETIME,trans_enter DATETIME,trans_delete DATETIME,"+
+                        "PRIMARY KEY("+domain.getName()+"_id,valid_from,trans_enter));";
             }
             query=query+temp1+temp+");";
         }
         query=query+temporalQuery;
-        String temp="";
         for(Domain domain:domains)
         {
             if(Relationships_1x1.containsKey(domain.getName()))
@@ -172,12 +172,12 @@ public class CreateQuery {
                 ArrayList<String> foreignKeys=Relationships_1x1.get(domain.getName());
                 for(String foreignKey:foreignKeys)
                 {
-                    temp=temp+"alter table "+domain.getName()+" add "+foreignKey+"_id int;";
-                    temp=temp+"alter table "+domain.getName()+" add constraint foreign key("+foreignKey+"_id) references "+foreignKey+"(id);";
+                    helperQuery=helperQuery+"alter table "+domain.getName()+" add "+foreignKey+"_id int;";
+                    helperQuery=helperQuery+"alter table "+domain.getName()+" add constraint foreign key("+foreignKey+"_id) references "+foreignKey+"(id);";
                     if(domain.isTemporal())
                     {
-                        temp=temp+"alter table "+domain.getName()+"_hist add "+foreignKey+"_id int;";
-                        temp=temp+"alter table "+domain.getName()+"_hist add constraint foreign key("+foreignKey+"_id) references "+foreignKey+"(id);";
+                        helperQuery=helperQuery+"alter table "+domain.getName()+"_hist add "+foreignKey+"_id int;";
+                        helperQuery=helperQuery+"alter table "+domain.getName()+"_hist add constraint foreign key("+foreignKey+"_id) references "+foreignKey+"(id);";
                     }
                 }
             }
@@ -187,17 +187,17 @@ public class CreateQuery {
                 ArrayList<String> foreignKeys=Relationships_Nx1.get(domain.getName());
                 for(String foreignKey:foreignKeys)
                 {
-                    temp=temp+"alter table "+domain.getName()+" add "+foreignKey+"_id int;";
-                    temp=temp+"alter table "+domain.getName()+" add constraint foreign key("+foreignKey+"_id) references "+foreignKey+"(id);";
+                    helperQuery=helperQuery+"alter table "+domain.getName()+" add "+foreignKey+"_id int;";
+                    helperQuery=helperQuery+"alter table "+domain.getName()+" add constraint foreign key("+foreignKey+"_id) references "+foreignKey+"(id);";
                     if(domain.isTemporal())
                     {
-                        temp=temp+"alter table "+domain.getName()+"_hist add "+foreignKey+"_id int;";
-                        temp=temp+"alter table "+domain.getName()+"_hist add constraint foreign key("+foreignKey+"_id) references "+foreignKey+"(id);";
+                        helperQuery=helperQuery+"alter table "+domain.getName()+"_hist add "+foreignKey+"_id int;";
+                        helperQuery=helperQuery+"alter table "+domain.getName()+"_hist add constraint foreign key("+foreignKey+"_id) references "+foreignKey+"(id);";
                     }
                 }
             }
         }
-        query=query+temp;
+        query=query+helperQuery;
         Iterator<Map.Entry<String, HashMap<String,String>>> parent = Relationship_Names.entrySet().iterator();
 
         while (parent.hasNext())
