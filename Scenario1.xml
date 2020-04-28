@@ -1,12 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<scenario name="Company">
+<scenario name="Factory">
 	<domains>
-		<domain name="employee">
-			<temporal>true</temporal>
+		<domain name="supervisor">
+			<temporal>false</temporal>
 			<event>
-				<name>empName</name>
+				<name>name</name>
 				<dataType>string</dataType>
+				<notnull>true</notnull>
 			</event>
 			<event>
 				<name>salary</name>
@@ -14,40 +15,52 @@
 				<notnull>true</notnull>
 				<unique>true</unique>
 			</event>
-		</domain>
-		<domain name="project">
-			<temporal>false</temporal>
 			<event>
-				<name>projectName</name>
-				<dataType>string</dataType>
-			</event>
-			<event>
-				<name>cost</name>
+				<name>age</name>
 				<dataType>integer</dataType>
-			</event>
+			</event>			
 		</domain>
-		<domain name="dependent">
+		<domain name="boiler">
 			<temporal>true</temporal>
 			<event>
-				<name>dependentName</name>
+				<name>boilerCode</name>
 				<dataType>string</dataType>
 			</event>
 			<event>
-				<name>dob</name>
-				<dataType>date</dataType>
+				<name>temperature</name>
+				<dataType>decimal</dataType>
+			</event>
+			<event>
+				<name>pressure</name>
+				<dataType>decimal</dataType>
+			</event>
+		</domain>
+		<domain name="pump">
+			<temporal>true</temporal>
+			<event>
+				<name>pumpCode</name>
+				<dataType>string</dataType>
+			</event>
+			<event>
+				<name>inflow</name>
+				<dataType>decimal</dataType>
+			</event>
+			<event>
+				<name>outflow</name>
+				<dataType>decimal</dataType>
 			</event>
 		</domain>
 	</domains>
 	<relationships>
-		<relationship name="works_on">
-			<type>nn</type>
-			<from>employee</from>
-			<to>project</to>
-		</relationship>
-		<relationship name="has">
+		<relationship name="manages">
 			<type>1n</type>
-			<from>employee</from>
-			<to>dependent</to>
+			<from>supervisor</from>
+			<to>boiler</to>
+		</relationship>
+		<relationship name="uses">
+			<type>nn</type>
+			<from>boiler</from>
+			<to>pump</to>
 		</relationship>
 	</relationships>
 </scenario>
