@@ -10,7 +10,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
-public class Query {
+public class CreateQuery {
 
     /*
     RETURNS THE HASHMAP OF 1:N RELATIONSHIPS
@@ -121,7 +121,6 @@ public class Query {
         }
 
         String query="";
-        String helperQuery="";
         String temporalQuery="";
         String database_name=scenario.getName();
         query=query+"create database "+database_name+";"+"use "+database_name+";";
@@ -129,9 +128,9 @@ public class Query {
         ArrayList<Relationship> relationships=scenario.getRelationships();
         HashMap<String,HashMap<String,String>> Relationship_Names=new HashMap<>();
 
-        HashMap<String,ArrayList<String>> Relationships_NxN=Query.get_Relationships_NxN(relationships,Relationship_Names);
-        HashMap<String,ArrayList<String>> Relationships_Nx1=Query.get_Relationships_Nx1(relationships);
-        HashMap<String,ArrayList<String>> Relationships_1x1=Query.get_Relationships_1x1(relationships);
+        HashMap<String,ArrayList<String>> Relationships_NxN= CreateQuery.get_Relationships_NxN(relationships,Relationship_Names);
+        HashMap<String,ArrayList<String>> Relationships_Nx1= CreateQuery.get_Relationships_Nx1(relationships);
+        HashMap<String,ArrayList<String>> Relationships_1x1= CreateQuery.get_Relationships_1x1(relationships);
 
 
 
@@ -141,7 +140,8 @@ public class Query {
             String temp2="";
             String temp="";
             temp1=temp1+"create table "+ domain.getName()+"("+"id INT NOT NULL AUTO_INCREMENT,PRIMARY KEY (id)";
-            temp2=temp2+"create table "+ domain.getName()+"_hist("+"id INT NOT NULL AUTO_INCREMENT,PRIMARY KEY (id)";
+            temp2=temp2+"create table "+ domain.getName()+"_hist("+"id INT NOT NULL AUTO_INCREMENT,PRIMARY KEY (id),"
+                        +domain.getName()+"_id INT,foreign key ("+domain.getName()+"_id) references "+domain.getName()+"(id)";
             ArrayList<Event> events= domain.getEvents();
             int events_len=events.size();
             for(Event event:events)
@@ -174,12 +174,7 @@ public class Query {
                 {
                     temp=temp+"alter table "+domain.getName()+" add "+foreignKey+"_id int;";
                     temp=temp+"alter table "+domain.getName()+" add constraint foreign key("+foreignKey+"_id) references "+foreignKey+"(id);";
-                    if (domain.isTemporal() && temporal_Resolver.get(foreignKey))
-                    {
-                        temp=temp+"alter table "+domain.getName()+"_hist add "+foreignKey+"_hist_id int;";
-                        temp=temp+"alter table "+domain.getName()+"_hist add constraint foreign key("+foreignKey+"_hist_id) references "+foreignKey+"_hist(id);";
-                    }
-                    else if(domain.isTemporal())
+                    if(domain.isTemporal())
                     {
                         temp=temp+"alter table "+domain.getName()+"_hist add "+foreignKey+"_id int;";
                         temp=temp+"alter table "+domain.getName()+"_hist add constraint foreign key("+foreignKey+"_id) references "+foreignKey+"(id);";
@@ -194,12 +189,7 @@ public class Query {
                 {
                     temp=temp+"alter table "+domain.getName()+" add "+foreignKey+"_id int;";
                     temp=temp+"alter table "+domain.getName()+" add constraint foreign key("+foreignKey+"_id) references "+foreignKey+"(id);";
-                    if (domain.isTemporal() && temporal_Resolver.get(foreignKey))
-                    {
-                        temp=temp+"alter table "+domain.getName()+"_hist add "+foreignKey+"_hist_id int;";
-                        temp=temp+"alter table "+domain.getName()+"_hist add constraint foreign key("+foreignKey+"_hist_id) references "+foreignKey+"_hist(id);";
-                    }
-                    else if(domain.isTemporal())
+                    if(domain.isTemporal())
                     {
                         temp=temp+"alter table "+domain.getName()+"_hist add "+foreignKey+"_id int;";
                         temp=temp+"alter table "+domain.getName()+"_hist add constraint foreign key("+foreignKey+"_id) references "+foreignKey+"(id);";
@@ -222,22 +212,6 @@ public class Query {
                         "foreign key ("+parentPair.getKey()+"_id) references "+parentPair.getKey()+"(id),"+
                         "foreign key ("+childPair.getKey()+"_id) references "+childPair.getKey()+"(id),"+
                         "PRIMARY KEY ("+parentPair.getKey()+"_id,"+childPair.getKey()+"_id)"+");";
-                if(temporal_Resolver.get(parentPair.getKey())&&temporal_Resolver.get(childPair.getKey()))
-                {
-                    query=query+"create table "+childPair.getValue()+"_hist("+
-                            parentPair.getKey()+"_hist_id INT,"+childPair.getKey()+"_hist_id INT,"+
-                            "foreign key ("+parentPair.getKey()+"_hist_id) references "+parentPair.getKey()+"_hist(id),"+
-                            "foreign key ("+childPair.getKey()+"_hist_id) references "+childPair.getKey()+"_hist(id),"+
-                            "PRIMARY KEY ("+parentPair.getKey()+"_hist_id,"+childPair.getKey()+"_hist_id)"+");";
-                }
-                if(temporal_Resolver.get(parentPair.getKey()))
-                {
-                    query=query+"create table "+childPair.getValue()+"_hist("+
-                            parentPair.getKey()+"_hist_id INT,"+childPair.getKey()+"_id INT,"+
-                            "foreign key ("+parentPair.getKey()+"_hist_id) references "+parentPair.getKey()+"_hist(id),"+
-                            "foreign key ("+childPair.getKey()+"_id) references "+childPair.getKey()+"(id),"+
-                            "PRIMARY KEY ("+parentPair.getKey()+"_hist_id,"+childPair.getKey()+"_id)"+");";
-                }
                 //child.remove(); // avoids a ConcurrentModificationException
             }
         }
