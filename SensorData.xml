@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<sensorData
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:noNamespaceSchemaLocation="src/main/resources/SensorData.xsd">
+	
+	<domain name="boilerReadings">
+		<reading>
+			<key>boilderCode</key>
+			<value>B1</value>
+		</reading>
+		<reading>
+			<key>temperature</key>
+			<value>23</value>
+		</reading>
+		<reading>
+			<key>pressure</key>
+			<value>45</value>
+		</reading>
+	</domain>
+</sensorData>
