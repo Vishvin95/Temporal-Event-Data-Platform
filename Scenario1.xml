@@ -35,6 +35,28 @@
 				<unique>true</unique>
 			</event>
 			<event>
+				<name>type</name>
+				<dataType>string</dataType>
+			</event>
+			<event>
+				<name>volume</name>
+				<dataType>decimal</dataType>
+			</event>
+			<event>
+				<name>temperatureTolerance</name>
+				<dataType>decimal</dataType>
+			</event>			
+			<primaryKey>boilerCode</primaryKey>
+		</domain>	
+		<domain name="boilerReadings">
+			<temporal>true</temporal>
+			<event>
+				<name>readingId</name>
+				<dataType>integer</dataType>
+				<notnull>true</notnull>
+				<unique>true</unique>
+			</event>
+			<event>
 				<name>temperature</name>
 				<dataType>decimal</dataType>
 				<notnull>true</notnull>
@@ -44,13 +66,31 @@
 				<dataType>decimal</dataType>
 				<notnull>true</notnull>
 			</event>
-			<primaryKey>boilerCode</primaryKey>
+			<primaryKey>readingId</primaryKey>
 		</domain>
 		<domain name="pump">
 			<temporal>true</temporal>
 			<event>
 				<name>pumpCode</name>
 				<dataType>string</dataType>
+				<notnull>true</notnull>
+				<unique>true</unique>
+			</event>
+			<event>
+				<name>installationDate</name>
+				<dataType>date</dataType>
+			</event>
+			<event>
+				<name>peakPower</name>
+				<dataType>decimal</dataType>
+			</event>
+			<primaryKey>pumpCode</primaryKey>
+		</domain>	
+		<domain name="pumpReadings">
+		    <temporal>true</temporal>
+		    <event>
+				<name>readingId</name>
+				<dataType>integer</dataType>
 				<notnull>true</notnull>
 				<unique>true</unique>
 			</event>
@@ -64,7 +104,7 @@
 				<dataType>decimal</dataType>
 				<notnull>true</notnull>
 			</event>
-			<primaryKey>pumpCode</primaryKey>
+			<primaryKey>readingId</primaryKey>
 		</domain>
 	</domains>
 	<relationships>
@@ -73,10 +113,25 @@
 			<from>supervisor</from>
 			<to>boiler</to>
 		</relationship>
+		<relationship name="manages">
+			<type>1n</type>
+			<from>supervisor</from>
+			<to>pump</to>
+		</relationship>
 		<relationship name="uses">
-			<type>nn</type>
+			<type>11</type>
 			<from>boiler</from>
 			<to>pump</to>
+		</relationship>
+		<relationship name="has">
+			<type>1n</type>
+			<from>boiler</from>
+			<to>boilerReadings</to>
+		</relationship>
+		<relationship name="has">
+			<type>1n</type>
+			<from>boiler</from>
+			<to>pumpReadings</to>
 		</relationship>
 	</relationships>
 </scenario>
