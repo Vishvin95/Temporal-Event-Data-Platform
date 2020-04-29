@@ -50,15 +50,15 @@ public class ModelApp {
 
 		Event e1 = new Event("salary", EventDataType.DECIMAL,true,false);
 		Event e2 = new Event("empName", EventDataType.STRING,true,false);
-		Domain d1 = new Domain.DomainBuilder("employee",false).addEvent(e1).addEvent(e2).build();
+		Domain d1 = new Domain.DomainBuilder("employee",false, "empName").addEvent(e1).addEvent(e2).build();
 
 		Event e3 = new Event("dob", EventDataType.DECIMAL,false,false);
 		Event e4 = new Event("dependentName", EventDataType.STRING,true,false);
-		Domain d2 = new Domain.DomainBuilder("dependent",false).addEvent(e3).addEvent(e4).build();
+		Domain d2 = new Domain.DomainBuilder("dependent",false, "dependentName").addEvent(e3).addEvent(e4).build();
 
 		Event e5 = new Event("cost", EventDataType.DECIMAL,true,false);
 		Event e6 = new Event("projectName", EventDataType.STRING,true,false);
-		Domain d3 = new Domain.DomainBuilder("project",false).addEvent(e5).addEvent(e6).build();
+		Domain d3 = new Domain.DomainBuilder("project",false, "projectName").addEvent(e5).addEvent(e6).build();
 
 		Relationship r1 = new Relationship("works_on", RelationshipType.MANY_TO_MANY, d1, d3);
 		Relationship r2 = new Relationship("has", RelationshipType.ONE_TO_MANY, d1, d2);

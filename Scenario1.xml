@@ -5,6 +5,12 @@
 		<domain name="supervisor">
 			<temporal>false</temporal>
 			<event>
+				<name>supId</name>
+				<dataType>string</dataType>
+				<notnull>true</notnull>
+				<unique>true</unique>
+			</event>
+			<event>
 				<name>name</name>
 				<dataType>string</dataType>
 				<notnull>true</notnull>
@@ -13,42 +19,52 @@
 				<name>salary</name>
 				<dataType>integer</dataType>
 				<notnull>true</notnull>
-				<unique>true</unique>
 			</event>
 			<event>
 				<name>age</name>
 				<dataType>integer</dataType>
-			</event>			
+			</event>
+			<primaryKey>supId</primaryKey>			
 		</domain>
 		<domain name="boiler">
 			<temporal>true</temporal>
 			<event>
 				<name>boilerCode</name>
 				<dataType>string</dataType>
+				<notnull>true</notnull>
+				<unique>true</unique>
 			</event>
 			<event>
 				<name>temperature</name>
 				<dataType>decimal</dataType>
+				<notnull>true</notnull>
 			</event>
 			<event>
 				<name>pressure</name>
 				<dataType>decimal</dataType>
+				<notnull>true</notnull>
 			</event>
+			<primaryKey>boilerCode</primaryKey>
 		</domain>
 		<domain name="pump">
 			<temporal>true</temporal>
 			<event>
 				<name>pumpCode</name>
 				<dataType>string</dataType>
+				<notnull>true</notnull>
+				<unique>true</unique>
 			</event>
 			<event>
 				<name>inflow</name>
 				<dataType>decimal</dataType>
+				<notnull>true</notnull>
 			</event>
 			<event>
 				<name>outflow</name>
 				<dataType>decimal</dataType>
+				<notnull>true</notnull>
 			</event>
+			<primaryKey>pumpCode</primaryKey>
 		</domain>
 	</domains>
 	<relationships>

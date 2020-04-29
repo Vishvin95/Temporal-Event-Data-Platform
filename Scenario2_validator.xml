@@ -1,59 +1,62 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <scenario name="Company">
-    <domains>
-        <domain name="employee">
-            <event>
-                <name>empName</name>
-                <dataType>string</dataType>
-                <type>SOE</type>
-            </event>
-            <event>
-                <name>salary</name>
-                <dataType>integer</dataType>
-                <type>MOE</type>
-            </event>
-        </domain>
-        <domain name="project">
-            <event>
-                <name>projectName</name>
-                <dataType>string</dataType>
-                <type>SOE</type>
-            </event>
-            <event>
-                <name>cost</name>
-                <dataType>integer</dataType>
-                <type>MOE</type>
-            </event>
-        </domain>
-        <domain name="dependent">
-            <event>
-                <name>dependentName</name>
-                <dataType>string</dataType>
-                <type>SOE</type>
-            </event>
-            <event>
-                <name>dob</name>
-                <dataType>date</dataType>
-                <type>SOE</type>
-            </event>
-        </domain>
-    </domains>
-    <relationships>
-        <relationship name="works_on">
-            <type>nn</type>
-            <from>employee</from>
-            <to>project</to>
-        </relationship>
-        <relationship name="works_on">
-            <type>nn</type>
-            <from>employee</from>
-            <to>project</to>
-        </relationship>
-        <relationship name="has">
-            <type>1n</type>
-            <from>employee</from>
-            <to>dependent</to>
-        </relationship>
-    </relationships>
+	<domains>
+		<domain name="employee">
+			<temporal>false</temporal>
+			<event>
+				<name>empName</name>
+				<dataType>string</dataType>
+				<notnull>true</notnull>
+			</event>
+			<event>
+				<name>salary</name>
+				<dataType>integer</dataType>
+			</event>
+			<primaryKey>empName</primaryKey>
+		</domain>
+		<domain name="project">
+			<temporal>false</temporal>
+			<event>
+				<name>projectName</name>
+				<dataType>string</dataType>
+			</event>
+			<event>
+				<name>cost</name>
+				<dataType>integer</dataType>
+			</event>
+			<primaryKey>projectName</primaryKey>
+		</domain>
+		<domain name="dependent">
+			<temporal>false</temporal>
+			<event>
+				<name>dependentName</name>
+				<dataType>string</dataType>
+
+			</event>
+			<event>
+				<name>dob</name>
+				<dataType>date</dataType>
+
+			</event>
+			<primaryKey>dependentName</primaryKey>
+		</domain>
+	</domains>
+	<relationships>
+		<relationship name="works_on">
+			<type>nn</type>
+			<from>employee</from>
+			<to>project</to>
+		</relationship>
+		<relationship name="works_on">
+			<type>nn</type>
+			<from>employee</from>
+			<to>project</to>
+		</relationship>
+		<relationship name="has">
+			<type>1n</type>
+			<from>employee</from>
+			<to>dependent</to>
+		</relationship>
+	</relationships>
 </scenario>

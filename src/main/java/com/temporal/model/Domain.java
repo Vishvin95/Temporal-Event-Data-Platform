@@ -9,6 +9,7 @@ public class Domain {
 	private String name;
 	private boolean temporal;
 	private ArrayList<Event> events;
+	private String primaryKey;
 
 	public Domain() {
 
@@ -17,6 +18,7 @@ public class Domain {
 	private Domain(DomainBuilder domainBuilder) {
 		this.name = domainBuilder.name;
 		this.events = domainBuilder.events;
+		this.primaryKey = domainBuilder.primaryKey;
 	}
 
 	@XmlAttribute(name = "name")
@@ -45,16 +47,43 @@ public class Domain {
 	public void setEvents(ArrayList<Event> events) {
 		this.events = events;
 	}
+	
+	@XmlElement(name = "primaryKey")
+	public String getPrimaryKey() {
+		return primaryKey;
+	}
+
+	public void setPrimaryKey(String primaryKey) {
+		this.primaryKey = primaryKey;
+	}
+
+	@Override
+	public String toString() {
+		String res = " " + name + "\n Temporal: "+ temporal +"\n";
+		for(Event event: events)
+		{
+			res = res + " " + event.getName() + "\t" + event.getDataType() + "\t";
+			if(event.isNotNull())
+				res = res + "not_null\t";
+			if(event.isUnique())
+				res = res + "unique";
+			res = res + "\n";
+		}
+		res = res + " Primary Key: " + primaryKey + "\n";
+		return res;
+	}
 
 	public static class DomainBuilder {
 		private final String name;
 		private final boolean temporal;
 		private ArrayList<Event> events;
+		private final String primaryKey;
 
-		public DomainBuilder(String name, boolean temporal) {
+		public DomainBuilder(String name, boolean temporal, String primaryKey) {
 			this.name = name;
 			this.temporal = temporal;
 			this.events = new ArrayList<Event>();
+			this.primaryKey = primaryKey;
 		}
 
 		public DomainBuilder addEvent(Event event) {

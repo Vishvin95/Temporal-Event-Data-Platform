@@ -120,19 +120,12 @@ public class Scenario {
 		System.out.println();
 		System.out.println("Tables:");
 		for (Domain domain : this.getDomains()) {
-			System.out.println("  " + domain.getName());
-			System.out.println("  Temporal: " + domain.isTemporal());
-			ArrayList<Event> el = domain.getEvents();
-
-			for (Event event : el) {
-				System.out.println(event);
-			}
+			System.out.println(domain);
 		}
 
 		System.out.println();
 		System.out.println("Relationships:");
 		for (Relationship relationship : this.getRelationships()) {
-			System.out.println(relationship.getName());
 			System.out.println("  " + relationship);
 		}
 	}
