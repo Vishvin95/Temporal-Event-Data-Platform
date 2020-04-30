@@ -2,7 +2,7 @@ package com.temporal.persistence;
 
 import com.temporal.model.InvalidScenarioException;
 import com.temporal.model.Scenario;
-import com.temporal.query.Query;
+import com.temporal.query.CreateQuery;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.xml.sax.SAXException;
@@ -51,13 +51,13 @@ public class PersistenceApp {
         final Connection connection = GlobalConnection.getConnection();
 
         Excecutor excecutor = new Excecutor();
-        Query query = new Query();
+        CreateQuery query = new CreateQuery();
         File file = new File("Scenario1.xml");
         Scenario scenario = null;
         try {
             scenario = Scenario.loadFromXML(file);
             scenario.printScenario();
-            Query q=new Query();
+            CreateQuery q=new CreateQuery();
             String s=q.CreateScenario(scenario);
             String[] queries = s.split(";");
             Arrays.stream(queries)
