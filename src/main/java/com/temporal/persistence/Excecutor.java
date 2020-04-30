@@ -16,7 +16,7 @@ public class Excecutor {
 
     public static Logger logger = LogManager.getLogger(Excecutor.class);
 
-    Excecutor(){
+    public Excecutor(){
         this.statements = new ArrayDeque<>();
 
     }

@@ -215,7 +215,7 @@ public class CreateQuery {
             {
                 temp1=temp1+",valid_from DATETIME,valid_to DATETIME,trans_enter DATETIME,trans_delete DATETIME";
                 temporalQuery=temporalQuery+temp2+",valid_from DATETIME,valid_to DATETIME,trans_enter DATETIME,trans_delete DATETIME,"+
-                        "PRIMARY KEY("+domain.getName()+"_"+domain.getPrimaryKey()+",valid_from,trans_enter));";
+                        "id int not null unique auto_increment,PRIMARY KEY(id));";
             }
             query=query+temp1+");";
         }
