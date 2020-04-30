@@ -2,7 +2,7 @@ package com.temporal.persistence;
 
 public class GenericSqlBuilder extends AbstractSqlBuilder {
     String sqlQuery;
-    GenericSqlBuilder(String sqlQuery){
+    public GenericSqlBuilder(String sqlQuery){
         this.sqlQuery = sqlQuery;
     }
 

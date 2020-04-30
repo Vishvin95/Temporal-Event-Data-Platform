@@ -4,6 +4,7 @@ import com.temporal.model.Domain;
 import com.temporal.model.Event;
 import com.temporal.model.Scenario;
 import com.temporal.model.Relationship;
+import javafx.util.Pair;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -88,81 +89,135 @@ public class CreateQuery {
         return relationships_NxN;
     }
 
-    /*
+    public static HashMap<String,Domain> getDomainByName(ArrayList<Domain> domains)
+    {
+        HashMap<String,Domain> map=new HashMap<>();
+        for(Domain domain:domains)
+        {
+            map.put(domain.getName(),domain);
+        }
+        return map;
+    }
 
-     */
-    public String CreateScenario(Scenario scenario){
-        /*
-          HASHMAP FOR DATATYPE RESOLVING
-        */
-        HashMap<String,String> dataType_Resolver=new HashMap<>();
-        dataType_Resolver.put("string","VARCHAR(50)");
-        dataType_Resolver.put("integer","INT");
-        dataType_Resolver.put("long","BIGINT");
-        dataType_Resolver.put("date","DATE");
-        dataType_Resolver.put("datetime","DATETIME");
-        dataType_Resolver.put("decimal","DECIMAL(16,4)");
-        dataType_Resolver.put("boolean","BOOLEAN");
+       /*
+         RETURNS HASHMAP FOR DATATYPE RESOLVING
+       */
+    public static HashMap<String,String> DataTypeResolver()
+    {
+        HashMap<String,String> map=new HashMap<>();
+        map.put("string","VARCHAR(50)");
+        map.put("integer","INT");
+        map.put("long","BIGINT");
+        map.put("date","DATE");
+        map.put("datetime","DATETIME");
+        map.put("decimal","DECIMAL(16,4)");
+        map.put("boolean","BOOLEAN");
+        return map;
+    }
 
-        ArrayList<Domain> domains=scenario.getDomains();
-
-
-        HashMap<String,Boolean> temporal_Resolver=new HashMap<>();
+       /*
+         RETURNS HASHMAP FOR TEMPORAL RESOLVING
+       */
+    public static HashMap<String,Boolean> TemporalResolver(ArrayList<Domain> domains)
+    {
+        HashMap<String,Boolean> map=new HashMap<>();
         for (Domain domain:domains)
         {
             if(domain.isTemporal())
             {
-                temporal_Resolver.put(domain.getName(),true);
+                map.put(domain.getName(),true);
             }
             else
             {
-                temporal_Resolver.put(domain.getName(),false);
+                map.put(domain.getName(),false);
             }
         }
+        return map;
+    }
+
+    public static HashMap<String,Pair<String,String>> PrimaryKeyResolver(ArrayList<Domain> domains)
+    {
+        HashMap<String, Pair<String,String>> map=new HashMap<>();
+        for (Domain domain:domains)
+        {
+            if(domain.getPrimaryKey().compareTo("")==0)
+            {
+                map.put(domain.getName(),new Pair<>("id","int"));
+            }
+            else
+            {
+                ArrayList<Event> events=domain.getEvents();
+                for(Event event:events)
+                {
+                    if(domain.getPrimaryKey().compareTo(event.getName())==0)
+                    {
+                        map.put(domain.getName(),new Pair<>(domain.getPrimaryKey(),event.getDataType()));
+                    }
+                }
+            }
+        }
+        return map;
+    }
+
+    /*
+         CREATES THE QUERY FOR THE WHOLR SCENARIO
+     */
+    public String CreateScenario(Scenario scenario){
+
+        ArrayList<Domain> domains=scenario.getDomains();
+
+        HashMap<String,String> dataType_Resolver=CreateQuery.DataTypeResolver();
+        HashMap<String,Boolean> temporal_Resolver=CreateQuery.TemporalResolver(domains);
 
         String query="";
         String helperQuery="";
         String temporalQuery="";
         String database_name=scenario.getName();
+
         query=query+"create database "+database_name+";"+"use "+database_name+";";
 
         ArrayList<Relationship> relationships=scenario.getRelationships();
-        HashMap<String,HashMap<String,String>> Relationship_Names=new HashMap<>();
 
+        HashMap<String,HashMap<String,String>> Relationship_Names=new HashMap<>();
         HashMap<String,ArrayList<String>> Relationships_NxN= CreateQuery.get_Relationships_NxN(relationships,Relationship_Names);
         HashMap<String,ArrayList<String>> Relationships_Nx1= CreateQuery.get_Relationships_Nx1(relationships);
         HashMap<String,ArrayList<String>> Relationships_1x1= CreateQuery.get_Relationships_1x1(relationships);
-
-
+        HashMap<String,Pair<String,String>> PrimaryKey_Resolver=CreateQuery.PrimaryKeyResolver(domains);
 
         for (Domain domain:domains)
         {
             String temp1="";
             String temp2="";
-            String temp="";
-            temp1=temp1+"create table "+ domain.getName()+"("+"id INT NOT NULL AUTO_INCREMENT,PRIMARY KEY (id)";
-            temp2=temp2+"create table "+ domain.getName()+"_hist("+domain.getName()+"_id INT";
+
+            temp1=temp1+"create table "+ domain.getName()+"(";
+            temp2=temp2+"create table "+ domain.getName()+"_hist(";
+
             ArrayList<Event> events= domain.getEvents();
-            int events_len=events.size();
             for(Event event:events)
             {
-                temp=temp+","+event.getName()+" "+dataType_Resolver.get(event.getDataType())+" ";
+                temp1=temp1+event.getName()+" "+dataType_Resolver.get(event.getDataType())+" ";
+                temp2=temp2+event.getName()+" "+dataType_Resolver.get(event.getDataType())+" ";
                 if (event.isNotNull())
                 {
-                    temp=temp+"NOT NULL ";
+                    temp1=temp1+"NOT NULL ";
                 }
                 if (event.isUnique())
                 {
-                    temp=temp+"UNIQUE";
+                    temp1=temp1+"UNIQUE";
                 }
+                temp1=temp1+",";
+                temp2=temp2+",";
             }
-
+            temp1=temp1+"PRIMARY KEY("+PrimaryKey_Resolver.get(domain.getName()).getKey()+")";
+            temp2=temp2+domain.getName()+"_"+PrimaryKey_Resolver.get(domain.getName()).getKey()+" "+
+                    dataType_Resolver.get(PrimaryKey_Resolver.get(domain.getName()).getValue());
             if(domain.isTemporal())
             {
-                temporalQuery=temporalQuery+temp2+temp+",valid_from DATETIME,valid_to DATETIME,trans_enter DATETIME,trans_delete DATETIME,"+
-                        "PRIMARY KEY("+domain.getName()+"_id,valid_from,trans_enter));";
+                temp1=temp1+",valid_from DATETIME,valid_to DATETIME,trans_enter DATETIME,trans_delete DATETIME";
+                temporalQuery=temporalQuery+temp2+",valid_from DATETIME,valid_to DATETIME,trans_enter DATETIME,trans_delete DATETIME,"+
+                        "id int not null unique auto_increment,PRIMARY KEY(id));";
             }
-            query=query+temp1+temp+");";
+            query=query+temp1+");";
         }
         query=query+temporalQuery;
         for(Domain domain:domains)
@@ -172,12 +227,14 @@ public class CreateQuery {
                 ArrayList<String> foreignKeys=Relationships_1x1.get(domain.getName());
                 for(String foreignKey:foreignKeys)
                 {
-                    helperQuery=helperQuery+"alter table "+domain.getName()+" add "+foreignKey+"_id int;";
-                    helperQuery=helperQuery+"alter table "+domain.getName()+" add constraint foreign key("+foreignKey+"_id) references "+foreignKey+"(id);";
+                    helperQuery=helperQuery+"alter table "+domain.getName()+" add "+foreignKey+"_"+PrimaryKey_Resolver.get(foreignKey).getKey()+
+                            " "+dataType_Resolver.get(PrimaryKey_Resolver.get(foreignKey).getValue())+";";
+                    helperQuery=helperQuery+"alter table "+domain.getName()+" add constraint foreign key("+
+                            foreignKey+"_"+PrimaryKey_Resolver.get(foreignKey).getKey()+") references "+foreignKey+"("+PrimaryKey_Resolver.get(foreignKey).getKey()+");";
                     if(domain.isTemporal())
                     {
-                        helperQuery=helperQuery+"alter table "+domain.getName()+"_hist add "+foreignKey+"_id int;";
-                        helperQuery=helperQuery+"alter table "+domain.getName()+"_hist add constraint foreign key("+foreignKey+"_id) references "+foreignKey+"(id);";
+                        helperQuery=helperQuery+"alter table "+domain.getName()+"_hist add "+foreignKey+"_"+PrimaryKey_Resolver.get(foreignKey).getKey()+
+                                " "+dataType_Resolver.get(PrimaryKey_Resolver.get(foreignKey).getValue())+";";
                     }
                 }
             }
@@ -187,12 +244,14 @@ public class CreateQuery {
                 ArrayList<String> foreignKeys=Relationships_Nx1.get(domain.getName());
                 for(String foreignKey:foreignKeys)
                 {
-                    helperQuery=helperQuery+"alter table "+domain.getName()+" add "+foreignKey+"_id int;";
-                    helperQuery=helperQuery+"alter table "+domain.getName()+" add constraint foreign key("+foreignKey+"_id) references "+foreignKey+"(id);";
+                    helperQuery=helperQuery+"alter table "+domain.getName()+" add "+foreignKey+"_"+PrimaryKey_Resolver.get(foreignKey).getKey()+
+                            " "+dataType_Resolver.get(PrimaryKey_Resolver.get(foreignKey).getValue())+";";
+                    helperQuery=helperQuery+"alter table "+domain.getName()+" add constraint foreign key("+
+                            foreignKey+"_"+PrimaryKey_Resolver.get(foreignKey).getKey()+") references "+foreignKey+"("+PrimaryKey_Resolver.get(foreignKey).getKey()+");";
                     if(domain.isTemporal())
                     {
-                        helperQuery=helperQuery+"alter table "+domain.getName()+"_hist add "+foreignKey+"_id int;";
-                        helperQuery=helperQuery+"alter table "+domain.getName()+"_hist add constraint foreign key("+foreignKey+"_id) references "+foreignKey+"(id);";
+                        helperQuery=helperQuery+"alter table "+domain.getName()+"_hist add "+foreignKey+"_"+PrimaryKey_Resolver.get(foreignKey).getKey()+
+                                " "+dataType_Resolver.get(PrimaryKey_Resolver.get(foreignKey).getValue())+";";
                     }
                 }
             }
@@ -208,10 +267,21 @@ public class CreateQuery {
             {
                 Map.Entry childPair = child.next();
                 query=query+"create table "+childPair.getValue()+"("+
-                        parentPair.getKey()+"_id INT,"+childPair.getKey()+"_id INT,"+
-                        "foreign key ("+parentPair.getKey()+"_id) references "+parentPair.getKey()+"(id),"+
-                        "foreign key ("+childPair.getKey()+"_id) references "+childPair.getKey()+"(id),"+
-                        "PRIMARY KEY ("+parentPair.getKey()+"_id,"+childPair.getKey()+"_id)"+");";
+
+                        parentPair.getKey()+"_"+PrimaryKey_Resolver.get(parentPair.getKey()).getKey()+" "+
+                        dataType_Resolver.get(PrimaryKey_Resolver.get(parentPair.getKey()).getValue())+","+
+
+                        childPair.getKey()+"_"+PrimaryKey_Resolver.get(childPair.getKey()).getKey()+" "+
+                        dataType_Resolver.get(PrimaryKey_Resolver.get(childPair.getKey()).getValue())+","+
+
+                        "foreign key ("+parentPair.getKey()+"_"+PrimaryKey_Resolver.get(parentPair.getKey()).getKey()+") references "
+                        +parentPair.getKey()+"("+PrimaryKey_Resolver.get(parentPair.getKey()).getKey()+"),"+
+
+                        "foreign key ("+childPair.getKey()+"_"+PrimaryKey_Resolver.get(childPair.getKey()).getKey()+") references "
+                        +childPair.getKey()+"("+PrimaryKey_Resolver.get(childPair.getKey()).getKey()+"),"+
+
+                        "PRIMARY KEY ("+parentPair.getKey()+"_"+PrimaryKey_Resolver.get(parentPair.getKey()).getKey()+","+
+                        childPair.getKey()+"_"+PrimaryKey_Resolver.get(childPair.getKey()).getKey()+")"+");";
                 //child.remove(); // avoids a ConcurrentModificationException
             }
         }
