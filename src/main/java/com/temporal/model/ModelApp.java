@@ -83,7 +83,7 @@ public class ModelApp {
 			invalidScenarioException.printStackTrace();
 		}
 		
-		RawSensorData data = RawSensorData.loadFromXML(new File("RawSensorData.xml"));
+		RawData data = RawData.loadFromXML(new File("RawData.xml"));
 		System.out.println();
 	}
 }
