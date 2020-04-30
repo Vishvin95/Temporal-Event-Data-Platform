@@ -188,7 +188,6 @@ public class CreateQuery {
         {
             String temp1="";
             String temp2="";
-            String temp="";
 
             temp1=temp1+"create table "+ domain.getName()+"(";
             temp2=temp2+"create table "+ domain.getName()+"_hist(";
@@ -196,22 +195,25 @@ public class CreateQuery {
             ArrayList<Event> events= domain.getEvents();
             for(Event event:events)
             {
-                temp=temp+event.getName()+" "+dataType_Resolver.get(event.getDataType())+" ";
+                temp1=temp1+event.getName()+" "+dataType_Resolver.get(event.getDataType())+" ";
+                temp2=temp2+event.getName()+" "+dataType_Resolver.get(event.getDataType())+" ";
                 if (event.isNotNull())
                 {
-                    temp=temp+"NOT NULL ";
+                    temp1=temp1+"NOT NULL ";
                 }
                 if (event.isUnique())
                 {
-                    temp=temp+"UNIQUE";
+                    temp1=temp1+"UNIQUE";
                 }
-                temp=temp+",";
+                temp1=temp1+",";
+                temp2=temp2+",";
             }
-            temp1=temp1+temp+"PRIMARY KEY("+PrimaryKey_Resolver.get(domain.getName()).getKey()+")";
-            temp2=temp2+temp+domain.getName()+"_"+PrimaryKey_Resolver.get(domain.getName()).getKey()+" "+
+            temp1=temp1+"PRIMARY KEY("+PrimaryKey_Resolver.get(domain.getName()).getKey()+")";
+            temp2=temp2+domain.getName()+"_"+PrimaryKey_Resolver.get(domain.getName()).getKey()+" "+
                     dataType_Resolver.get(PrimaryKey_Resolver.get(domain.getName()).getValue());
             if(domain.isTemporal())
             {
+                temp1=temp1+",valid_from DATETIME,valid_to DATETIME,trans_enter DATETIME,trans_delete DATETIME";
                 temporalQuery=temporalQuery+temp2+",valid_from DATETIME,valid_to DATETIME,trans_enter DATETIME,trans_delete DATETIME,"+
                         "PRIMARY KEY("+domain.getName()+"_"+domain.getPrimaryKey()+",valid_from,trans_enter));";
             }
