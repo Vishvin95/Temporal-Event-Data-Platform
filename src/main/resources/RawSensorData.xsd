@@ -3,7 +3,7 @@
 	<xs:element name="sensorData">
 		<xs:complexType>
 			<xs:sequence>
-				<xs:element name="domain">
+				<xs:element name="readings" minOccurs="1" maxOccurs="1">
 					<xs:complexType>
 						<xs:sequence>
 							<xs:element name="reading" minOccurs="1" maxOccurs="unbounded">

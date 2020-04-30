@@ -2,10 +2,19 @@ package com.temporal.model;
 
 import org.xml.sax.SAXException;
 
+import com.temporal.persistence.DescribeBuilder;
+import com.temporal.persistence.Excecutor;
+
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.UnmarshalException;
 
 import java.io.File;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.util.List;
+import java.util.concurrent.Executor;
 
 public class ModelApp {
 	public static void main(String... args) throws JAXBException, SAXException {
@@ -73,5 +82,8 @@ public class ModelApp {
 		} catch (InvalidScenarioException invalidScenarioException) {
 			invalidScenarioException.printStackTrace();
 		}
+		
+		RawSensorData data = RawSensorData.loadFromXML(new File("RawSensorData.xml"));
+		System.out.println();
 	}
 }

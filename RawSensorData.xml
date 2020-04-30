@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <sensorData
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:noNamespaceSchemaLocation="src/main/resources/SensorData.xsd">
+	xsi:noNamespaceSchemaLocation="src/main/resources/RawSensorData.xsd">
 	
-	<domain name="boilerReadings">
+	<readings name="boilerReadings">
 		<reading>
 			<key>boilderCode</key>
 			<value>B1</value>
@@ -16,5 +16,5 @@
 			<key>pressure</key>
 			<value>45</value>
 		</reading>
-	</domain>
+	</readings>
 </sensorData>
