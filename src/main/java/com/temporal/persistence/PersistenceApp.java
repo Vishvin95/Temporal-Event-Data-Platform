@@ -48,9 +48,10 @@ public class PersistenceApp {
 
 
 
-        final Connection connection = GlobalConnection.getConnection();
+        //final Connection connection = GlobalConnection.getConnection();
 
         Excecutor excecutor = new Excecutor();
+
         CreateQuery query = new CreateQuery();
         File file = new File("Scenario1.xml");
         Scenario scenario = null;
@@ -63,17 +64,11 @@ public class PersistenceApp {
             Arrays.stream(queries)
                     .map(GenericSqlBuilder::new)
                     .forEach(excecutor::addSqlQuery);
-            excecutor.execute();
+            List<ResultSet> execute = excecutor.execute();
+            execute.forEach(DBTablePrinter::printResultSet);
         } catch (SAXException | JAXBException | InvalidScenarioException e) {
             e.printStackTrace();
         }
-
-
-
-
-
-
-
 
     }
 }
