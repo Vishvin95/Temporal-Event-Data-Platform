@@ -13,7 +13,9 @@ import java.util.List;
 
 public class Excecutor {
     private ArrayDeque<AbstractSqlBuilder> statements;
+
     public static Logger logger = LogManager.getLogger(Excecutor.class);
+
     Excecutor(){
         this.statements = new ArrayDeque<>();
 
@@ -21,6 +23,7 @@ public class Excecutor {
     public void addSqlQuery(AbstractSqlBuilder sqlBuilder){
         this.statements.addLast(sqlBuilder);
     }
+
     public List<ResultSet> execute(){
         List<ResultSet> resultSets = new ArrayList<>();
         for(AbstractSqlBuilder abstractSqlBuilder : statements){
@@ -30,7 +33,7 @@ public class Excecutor {
                 logger.info("[Success] : "+abstractSqlBuilder.toString());
                 resultSets.add(resultSet);
             } catch (SQLException e) {
-                logger.error("[Fail] "+e);
+                logger.error("[Fail] "+e+" [QUERY] : "+abstractSqlBuilder);
             }
         }
         return resultSets;

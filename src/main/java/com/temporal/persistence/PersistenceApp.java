@@ -1,10 +1,19 @@
 package com.temporal.persistence;
 
+import com.temporal.model.InvalidScenarioException;
+import com.temporal.model.Scenario;
+import com.temporal.query.Query;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.xml.sax.SAXException;
 
+import javax.xml.bind.JAXBException;
+import java.io.File;
 import java.sql.*;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Properties;
+import java.util.stream.Collectors;
 
 public class PersistenceApp {
     public static Logger logger = LogManager.getLogger(PersistenceApp.class);
@@ -41,13 +50,29 @@ public class PersistenceApp {
 
         final Connection connection = GlobalConnection.getConnection();
 
+        Excecutor excecutor = new Excecutor();
+        Query query = new Query();
+        File file = new File("Scenario1.xml");
+        Scenario scenario = null;
         try {
-            Statement statement = connection.createStatement();
-            ResultSet resultSet = statement.executeQuery("select *from ForeCast");
-            DBTablePrinter.printResultSet(resultSet);
-        } catch (SQLException e) {
-            logger.error(e);
+            scenario = Scenario.loadFromXML(file);
+            scenario.printScenario();
+            Query q=new Query();
+            String s=q.CreateScenario(scenario);
+            String[] queries = s.split(";");
+            Arrays.stream(queries)
+                    .map(GenericSqlBuilder::new)
+                    .forEach(excecutor::addSqlQuery);
+            excecutor.execute();
+        } catch (SAXException | JAXBException | InvalidScenarioException e) {
+            e.printStackTrace();
         }
+
+
+
+
+
+
 
 
     }
