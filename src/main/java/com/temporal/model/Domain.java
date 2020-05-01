@@ -62,12 +62,7 @@ public class Domain {
 		String res = " " + name + "\n Temporal: "+ temporal +"\n";
 		for(Event event: events)
 		{
-			res = res + " " + event.getName() + "\t" + event.getDataType() + "\t";
-			if(event.isNotNull())
-				res = res + "not_null\t";
-			if(event.isUnique())
-				res = res + "unique";
-			res = res + "\n";
+			res = res + " " + event.toString() + "\n";
 		}
 		res = res + " Primary Key: " + primaryKey + "\n";
 		return res;
