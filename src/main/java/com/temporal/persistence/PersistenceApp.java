@@ -61,16 +61,22 @@ public class PersistenceApp {
         File file = new File("Scenario1.xml");
         Scenario scenario = null;
         try {
+            //Load scenario xml
             scenario = Scenario.loadFromXML(file);
             scenario.printScenario();
             CreateQuery q=new CreateQuery();
+
+            //Creating DDL for the table
             String s=q.CreateScenario(scenario);
             String[] queries = s.split(";");
+
+            //Executing the results
             Arrays.stream(queries)
                     .map(GenericSqlBuilder::new)
                     .forEach(excecutor::addSqlQuery);
             List<ResultSet> execute = excecutor.execute();
             execute.forEach(DBTablePrinter::printResultSet);
+
         } catch (SAXException | JAXBException | InvalidScenarioException e) {
             e.printStackTrace();
         }
