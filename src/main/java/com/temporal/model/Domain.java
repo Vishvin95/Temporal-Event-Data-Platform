@@ -7,7 +7,6 @@ import javax.xml.bind.annotation.XmlElement;
 
 public class Domain {
 	private String name;
-	private boolean temporal;
 	private ArrayList<Event> events;
 	private String primaryKey;
 
@@ -30,15 +29,6 @@ public class Domain {
 		this.name = name;
 	}
 
-	@XmlElement(name = "temporal")
-	public boolean isTemporal() {
-		return temporal;
-	}
-
-	public void setTemporal(boolean temporal) {
-		this.temporal = temporal;
-	}
-
 	@XmlElement(name = "event")
 	public ArrayList<Event> getEvents() {
 		return events;
@@ -59,7 +49,7 @@ public class Domain {
 
 	@Override
 	public String toString() {
-		String res = " " + name + "\n Temporal: "+ temporal +"\n";
+		String res = " " + name +"\n";
 		for(Event event: events)
 		{
 			res = res + " " + event.toString() + "\n";
@@ -70,13 +60,11 @@ public class Domain {
 
 	public static class DomainBuilder {
 		private final String name;
-		private final boolean temporal;
 		private ArrayList<Event> events;
 		private final String primaryKey;
 
-		public DomainBuilder(String name, boolean temporal, String primaryKey) {
+		public DomainBuilder(String name, String primaryKey) {
 			this.name = name;
-			this.temporal = temporal;
 			this.events = new ArrayList<Event>();
 			this.primaryKey = primaryKey;
 		}

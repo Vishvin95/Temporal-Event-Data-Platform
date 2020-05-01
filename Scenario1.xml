@@ -3,12 +3,11 @@
 <scenario name="Factory">
 	<domains>
 		<domain name="supervisor">
-			<temporal>false</temporal>
 			<event>
 				<name>supId</name>
 				<dataType>string</dataType>
 				<notnull>true</notnull>
-				<unique>true</unique>
+				<unique>true</unique>				
 			</event>
 			<event>
 				<name>name</name>
@@ -19,51 +18,53 @@
 				<name>salary</name>
 				<dataType>integer</dataType>
 				<notnull>true</notnull>
-				<moe>true</moe>
+				<moe overlap="false" />
 			</event>
 			<event>
 				<name>age</name>
-				<dataType>integer</dataType>
+				<dataType>integer</dataType>				
 			</event>
 			<primaryKey>supId</primaryKey>			
 		</domain>
 		<domain name="boiler">
-			<temporal>true</temporal>
 			<event>
 				<name>boilerCode</name>
 				<dataType>string</dataType>
 				<notnull>true</notnull>
-				<unique>true</unique>
+				<unique>true</unique>				
 			</event>
 			<event>
 				<name>temperature</name>
 				<dataType>decimal</dataType>
 				<notnull>true</notnull>
+				<moe overlap="false" />
 			</event>
 			<event>
 				<name>pressure</name>
 				<dataType>decimal</dataType>
 				<notnull>true</notnull>
+				<moe overlap="false" />
 			</event>
 			<primaryKey>boilerCode</primaryKey>
 		</domain>
 		<domain name="pump">
-			<temporal>true</temporal>
 			<event>
 				<name>pumpCode</name>
 				<dataType>string</dataType>
 				<notnull>true</notnull>
-				<unique>true</unique>
+				<unique>true</unique>				
 			</event>
 			<event>
 				<name>inflow</name>
 				<dataType>decimal</dataType>
 				<notnull>true</notnull>
+				<moe overlap="false" />
 			</event>
 			<event>
 				<name>outflow</name>
 				<dataType>decimal</dataType>
 				<notnull>true</notnull>
+				<moe overlap="false" />
 			</event>
 			<primaryKey>pumpCode</primaryKey>
 		</domain>
