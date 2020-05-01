@@ -1,11 +1,14 @@
 package com.temporal.persistence;
 
+import com.sun.javafx.util.Logging;
 import com.temporal.model.InvalidScenarioException;
 import com.temporal.model.Scenario;
 import com.temporal.query.CreateQuery;
+import javafx.util.Pair;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.xml.sax.SAXException;
+import sun.security.x509.X500Name;
 
 import javax.xml.bind.JAXBException;
 import java.io.File;
@@ -48,6 +51,8 @@ public class PersistenceApp {
 
 
 
+
+
         //final Connection connection = GlobalConnection.getConnection();
 
         Excecutor excecutor = new Excecutor();
@@ -69,6 +74,9 @@ public class PersistenceApp {
         } catch (SAXException | JAXBException | InvalidScenarioException e) {
             e.printStackTrace();
         }
+
+
+
 
     }
 }
