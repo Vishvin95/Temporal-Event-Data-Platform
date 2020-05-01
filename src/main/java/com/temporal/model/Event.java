@@ -7,6 +7,7 @@ public class Event {
 	private String dataType;
 	private boolean notNull;
 	private boolean unique;
+	private boolean moe;
 
 	public Event() {
 		
@@ -19,11 +20,12 @@ public class Event {
 	 *                 EventDataType.INTEGER, EventDataType.LONG, EventDataType.DATE,
 	 *                 EventDataType.DATE_TIME
 	 */
-	public Event(String name, EventDataType dataType, boolean notNull, boolean unique) {
+	public Event(String name, EventDataType dataType, boolean notNull, boolean unique, boolean moe) {
 		this.name = name;
 		this.dataType = dataType.getEventDataType();
 		this.notNull = notNull;
 		this.unique = unique;
+		this.moe = moe;
 	}
 
 	public String getName() {
@@ -60,6 +62,15 @@ public class Event {
 	public void setUnique(boolean unique) {
 		this.unique = unique;
 	}
+	
+	@XmlElement(name = "moe")
+	public boolean isMoe() {
+		return moe;
+	}
+
+	public void setMoe(boolean moe) {
+		this.moe = moe;
+	}
 
 	@Override
 	public String toString() {
@@ -69,6 +80,8 @@ public class Event {
 			eventString = eventString + "\tnot_null";
 		if(this.unique)
 			eventString = eventString + "\tunique";
+		if(this.moe)
+			eventString = eventString + "\tmoe";
 		return eventString;
 	}
 }

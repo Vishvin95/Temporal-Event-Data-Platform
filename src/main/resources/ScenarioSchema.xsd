@@ -38,6 +38,8 @@
 														maxOccurs="1" type="xs:boolean" default="false" />
 													<xs:element name="unique" minOccurs="0"
 														maxOccurs="1" type="xs:boolean" default="false" />
+													<xs:element name="moe" minOccurs="0"
+														maxOccurs="1" type="xs:boolean" default="false" />
 												</xs:sequence>
 											</xs:complexType>
 										</xs:element>
