@@ -186,38 +186,30 @@ public class CreateQuery {
 
         for (Domain domain:domains)
         {
-            String temp1="";
-            String temp2="";
-
-            temp1=temp1+"create table "+ domain.getName()+"(";
-            temp2=temp2+"create table "+ domain.getName()+"_hist(";
-
+            query=query+"create table "+ domain.getName()+"(";
             ArrayList<Event> events= domain.getEvents();
             for(Event event:events)
             {
-                temp1=temp1+event.getName()+" "+dataType_Resolver.get(event.getDataType())+" ";
-                temp2=temp2+event.getName()+" "+dataType_Resolver.get(event.getDataType())+" ";
+                query=query+event.getName()+" "+dataType_Resolver.get(event.getDataType())+" ";
                 if (event.isNotNull())
                 {
-                    temp1=temp1+"NOT NULL ";
+                    query=query+"NOT NULL ";
                 }
                 if (event.isUnique())
                 {
-                    temp1=temp1+"UNIQUE";
+                    query=query+"UNIQUE";
                 }
-                temp1=temp1+",";
-                temp2=temp2+",";
+                query=query+",";
+                if(event.isMoe())
+                {
+                    temporalQuery=temporalQuery+"create table "+event.getName()+"(id int not null unique auto_increment,value "+
+                                  dataType_Resolver.get(event.getDataType())+","+
+                            domain.getName()+"_"+PrimaryKey_Resolver.get(domain.getName())+" "+dataType_Resolver.get(PrimaryKey_Resolver.get(domain.getName()))+
+                            ");";
+                }
             }
-            temp1=temp1+"PRIMARY KEY("+PrimaryKey_Resolver.get(domain.getName()).getKey()+")";
-            temp2=temp2+domain.getName()+"_"+PrimaryKey_Resolver.get(domain.getName()).getKey()+" "+
-                    dataType_Resolver.get(PrimaryKey_Resolver.get(domain.getName()).getValue());
-            if(domain.isTemporal())
-            {
-                temp1=temp1+",valid_from DATETIME,valid_to DATETIME,trans_enter DATETIME,trans_delete DATETIME";
-                temporalQuery=temporalQuery+temp2+",valid_from DATETIME,valid_to DATETIME,trans_enter DATETIME,trans_delete DATETIME,"+
-                        "id int not null unique auto_increment,PRIMARY KEY(id));";
-            }
-            query=query+temp1+");";
+            query=query+"PRIMARY KEY("+PrimaryKey_Resolver.get(domain.getName()).getKey()+")";
+            query=query+");";
         }
         query=query+temporalQuery;
         for(Domain domain:domains)
