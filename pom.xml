@@ -111,13 +111,6 @@
 			<version>2.13.1</version>
 		</dependency>
 		
-		<!-- https://mvnrepository.com/artifact/org.openjfx/javafx-base -->
-		<dependency>
-			<groupId>org.openjfx</groupId>
-			<artifactId>javafx-base</artifactId>
-			<version>14.0.1</version>
-		</dependency>
-
 	</dependencies>
 
 </project>

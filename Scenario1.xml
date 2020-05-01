@@ -19,6 +19,7 @@
 				<name>salary</name>
 				<dataType>integer</dataType>
 				<notnull>true</notnull>
+				<moe>true</moe>
 			</event>
 			<event>
 				<name>age</name>
