@@ -2,7 +2,7 @@ package com.temporal.model;
 
 import javax.xml.bind.annotation.XmlElement;
 
-public class RawReading {
+public class Column {
 	private String key;
 	private String value;
 	

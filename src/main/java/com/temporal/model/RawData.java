@@ -13,27 +13,27 @@ import javax.xml.validation.SchemaFactory;
 
 import org.xml.sax.SAXException;
 
-@XmlRootElement(name = "sensorData")
-public class RawSensorData {
-	private RawReadings rawReadings;
+@XmlRootElement(name = "inputData")
+public class RawData {
+	private Table table;
 
-	@XmlElement(name="readings")
-	public RawReadings getRawReadings() {
-		return rawReadings;
+	@XmlElement(name="table")
+	public Table getRawReadings() {
+		return table;
 	}
 
-	public void setRawReadings(RawReadings rawReadings) {
-		this.rawReadings = rawReadings;
+	public void setRawReadings(Table table) {
+		this.table = table;
 	}
 
-	public static RawSensorData loadFromXML(File file) throws SAXException, JAXBException {
+	public static RawData loadFromXML(File file) throws SAXException, JAXBException {
 		SchemaFactory sf = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
 		Schema scenarioSchema = sf
-				.newSchema(Thread.currentThread().getContextClassLoader().getResource("RawSensorData.xsd"));
-		JAXBContext jaxbContext = JAXBContext.newInstance(RawSensorData.class);
+				.newSchema(Thread.currentThread().getContextClassLoader().getResource("RawData.xsd"));
+		JAXBContext jaxbContext = JAXBContext.newInstance(RawData.class);
 		Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
 		unmarshaller.setSchema(scenarioSchema);
-		RawSensorData data = (RawSensorData) unmarshaller.unmarshal(file);
+		RawData data = (RawData) unmarshaller.unmarshal(file);
 		return data;
 	}
 }

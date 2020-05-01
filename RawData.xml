@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<inputData
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:noNamespaceSchemaLocation="src/main/resources/RawData.xsd">
+
+	<table name="boiler">
+		<row>
+			<column>
+				<key>boilderCode</key>
+				<value>B1</value>
+			</column>
+			<column>
+				<key>temperature</key>
+				<value>23</value>
+			</column>
+			<column>
+				<key>pressure</key>
+				<value>45</value>
+			</column>
+		</row>
+	</table>
+</inputData>

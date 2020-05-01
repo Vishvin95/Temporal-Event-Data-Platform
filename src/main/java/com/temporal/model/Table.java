@@ -4,11 +4,12 @@ import java.util.ArrayList;
 
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlElementWrapper;
 
 
-public class RawReadings {
+public class Table {
 	private String name;
-	private ArrayList<RawReading> rawReadings;
+	private ArrayList<Column> columns;
 	
 	@XmlAttribute(name = "name")
 	public String getName() {
@@ -18,11 +19,12 @@ public class RawReadings {
 		this.name = name;
 	}
 	
-	@XmlElement(name = "reading")
-	public ArrayList<RawReading> getRawReadings() {
-		return rawReadings;
+	@XmlElementWrapper(name = "row")
+	@XmlElement(name = "column")
+	public ArrayList<Column> getRawReadings() {
+		return columns;
 	}
-	public void setRawReadings(ArrayList<RawReading> rawReadings) {
-		this.rawReadings = rawReadings;
+	public void setRawReadings(ArrayList<Column> columns) {
+		this.columns = columns;
 	}
 }
