@@ -118,22 +118,7 @@ public class CreateQuery {
        /*
          RETURNS HASHMAP FOR TEMPORAL RESOLVING
        */
-    public static HashMap<String,Boolean> TemporalResolver(ArrayList<Domain> domains)
-    {
-        HashMap<String,Boolean> map=new HashMap<>();
-        for (Domain domain:domains)
-        {
-            if(domain.isTemporal())
-            {
-                map.put(domain.getName(),true);
-            }
-            else
-            {
-                map.put(domain.getName(),false);
-            }
-        }
-        return map;
-    }
+
 
     public static HashMap<String,Pair<String,String>> PrimaryKeyResolver(ArrayList<Domain> domains)
     {
@@ -167,7 +152,6 @@ public class CreateQuery {
         ArrayList<Domain> domains=scenario.getDomains();
 
         HashMap<String,String> dataType_Resolver=CreateQuery.DataTypeResolver();
-        HashMap<String,Boolean> temporal_Resolver=CreateQuery.TemporalResolver(domains);
 
         String query="";
         String helperQuery="";
@@ -200,12 +184,12 @@ public class CreateQuery {
                     query=query+"UNIQUE";
                 }
                 query=query+",";
-                if(event.isMoe())
+                if(event.getMoe()!=null)
                 {
                     temporalQuery=temporalQuery+"create table "+event.getName()+"(id int not null unique auto_increment,value "+
                                   dataType_Resolver.get(event.getDataType())+","+
-                            domain.getName()+"_"+PrimaryKey_Resolver.get(domain.getName())+" "+dataType_Resolver.get(PrimaryKey_Resolver.get(domain.getName()))+
-                            ");";
+                            domain.getName()+"_"+PrimaryKey_Resolver.get(domain.getName()).getKey()+" "+dataType_Resolver.get(PrimaryKey_Resolver.get(domain.getName()).getValue())+
+                            ",valid_from datetime,valid_to datetime,transaction_enter datetime,transaction_delete datetime);";
                 }
             }
             query=query+"PRIMARY KEY("+PrimaryKey_Resolver.get(domain.getName()).getKey()+")";
@@ -223,11 +207,11 @@ public class CreateQuery {
                             " "+dataType_Resolver.get(PrimaryKey_Resolver.get(foreignKey).getValue())+";";
                     helperQuery=helperQuery+"alter table "+domain.getName()+" add constraint foreign key("+
                             foreignKey+"_"+PrimaryKey_Resolver.get(foreignKey).getKey()+") references "+foreignKey+"("+PrimaryKey_Resolver.get(foreignKey).getKey()+");";
-                    if(domain.isTemporal())
-                    {
-                        helperQuery=helperQuery+"alter table "+domain.getName()+"_hist add "+foreignKey+"_"+PrimaryKey_Resolver.get(foreignKey).getKey()+
-                                " "+dataType_Resolver.get(PrimaryKey_Resolver.get(foreignKey).getValue())+";";
-                    }
+
+                    helperQuery=helperQuery+"create table "+domain.getName()+"_"+foreignKey+"_hist("+"id int not null unique auto_increment,"+
+                                PrimaryKey_Resolver.get(foreignKey).getKey()+" "+dataType_Resolver.get(PrimaryKey_Resolver.get(foreignKey).getValue())+
+                                ","+PrimaryKey_Resolver.get(domain.getName()).getKey()+" "+dataType_Resolver.get(PrimaryKey_Resolver.get(domain.getName()).getValue())+
+                                 ",valid_from datetime,valid_to datetime,transaction_enter datetime,transaction_delete datetime);";
                 }
             }
 
@@ -240,11 +224,11 @@ public class CreateQuery {
                             " "+dataType_Resolver.get(PrimaryKey_Resolver.get(foreignKey).getValue())+";";
                     helperQuery=helperQuery+"alter table "+domain.getName()+" add constraint foreign key("+
                             foreignKey+"_"+PrimaryKey_Resolver.get(foreignKey).getKey()+") references "+foreignKey+"("+PrimaryKey_Resolver.get(foreignKey).getKey()+");";
-                    if(domain.isTemporal())
-                    {
-                        helperQuery=helperQuery+"alter table "+domain.getName()+"_hist add "+foreignKey+"_"+PrimaryKey_Resolver.get(foreignKey).getKey()+
-                                " "+dataType_Resolver.get(PrimaryKey_Resolver.get(foreignKey).getValue())+";";
-                    }
+
+                    helperQuery=helperQuery+"create table "+domain.getName()+"_"+foreignKey+"_hist("+"id int not null unique auto_increment,"+
+                            PrimaryKey_Resolver.get(foreignKey).getKey()+" "+dataType_Resolver.get(PrimaryKey_Resolver.get(foreignKey).getValue())+
+                            ","+PrimaryKey_Resolver.get(domain.getName()).getKey()+" "+dataType_Resolver.get(PrimaryKey_Resolver.get(domain.getName()).getValue())+
+                            ",valid_from datetime,valid_to datetime,transaction_enter datetime,transaction_delete datetime);";
                 }
             }
         }
@@ -266,14 +250,16 @@ public class CreateQuery {
                         childPair.getKey()+"_"+PrimaryKey_Resolver.get(childPair.getKey()).getKey()+" "+
                         dataType_Resolver.get(PrimaryKey_Resolver.get(childPair.getKey()).getValue())+","+
 
-                        "foreign key ("+parentPair.getKey()+"_"+PrimaryKey_Resolver.get(parentPair.getKey()).getKey()+") references "
-                        +parentPair.getKey()+"("+PrimaryKey_Resolver.get(parentPair.getKey()).getKey()+"),"+
-
-                        "foreign key ("+childPair.getKey()+"_"+PrimaryKey_Resolver.get(childPair.getKey()).getKey()+") references "
-                        +childPair.getKey()+"("+PrimaryKey_Resolver.get(childPair.getKey()).getKey()+"),"+
+//                        "foreign key ("+parentPair.getKey()+"_"+PrimaryKey_Resolver.get(parentPair.getKey()).getKey()+") references "
+//                        +parentPair.getKey()+"("+PrimaryKey_Resolver.get(parentPair.getKey()).getKey()+"),"+
+//
+//                        "foreign key ("+childPair.getKey()+"_"+PrimaryKey_Resolver.get(childPair.getKey()).getKey()+") references "
+//                        +childPair.getKey()+"("+PrimaryKey_Resolver.get(childPair.getKey()).getKey()+"),"+
 
                         "PRIMARY KEY ("+parentPair.getKey()+"_"+PrimaryKey_Resolver.get(parentPair.getKey()).getKey()+","+
-                        childPair.getKey()+"_"+PrimaryKey_Resolver.get(childPair.getKey()).getKey()+")"+");";
+                        childPair.getKey()+"_"+PrimaryKey_Resolver.get(childPair.getKey()).getKey()+")"+
+
+                        ",valid_from datetime,valid_to datetime,transaction_enter datetime,transaction_delete datetime);";
                 //child.remove(); // avoids a ConcurrentModificationException
             }
         }
