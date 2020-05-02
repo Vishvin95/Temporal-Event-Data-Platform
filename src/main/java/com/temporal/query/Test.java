@@ -32,6 +32,7 @@ public class Test {
 //        RawData rawdata = RawData.loadFromXML(file1);
 //        InsertQuery.insert(rawdata.getRawReadings(),scenario);
 
+
     }
 }
 

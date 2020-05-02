@@ -1,11 +1,14 @@
 package com.temporal.persistence;
 
+import com.sun.javafx.util.Logging;
 import com.temporal.model.InvalidScenarioException;
 import com.temporal.model.Scenario;
 import com.temporal.query.CreateQuery;
+import javafx.util.Pair;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.xml.sax.SAXException;
+import sun.security.x509.X500Name;
 
 import javax.xml.bind.JAXBException;
 import java.io.File;
@@ -46,6 +49,14 @@ public class PersistenceApp {
                 .addField(new Field("id", Field.Field_Type.VARCAHR).autoIncrement().primaryKey());
 
 
+        //Use Builder
+        UseBuilder ub = new UseBuilder("factory");
+        System.out.println(ub);
+        //CreateDatabase
+        CreateBuilder cd = new CreateBuilder().getDatabaseBuilder("factory");
+        System.out.println(cd);
+
+
 
 
         //final Connection connection = GlobalConnection.getConnection();
@@ -56,19 +67,28 @@ public class PersistenceApp {
         File file = new File("Scenario1.xml");
         Scenario scenario = null;
         try {
+            //Load scenario xml
             scenario = Scenario.loadFromXML(file);
             scenario.printScenario();
             CreateQuery q=new CreateQuery();
+
+            //Creating DDL for the table
             String s=q.CreateScenario(scenario);
             String[] queries = s.split(";");
+
+            //Executing the results
             Arrays.stream(queries)
                     .map(GenericSqlBuilder::new)
                     .forEach(excecutor::addSqlQuery);
             List<ResultSet> execute = excecutor.execute();
             execute.forEach(DBTablePrinter::printResultSet);
+
         } catch (SAXException | JAXBException | InvalidScenarioException e) {
             e.printStackTrace();
         }
+
+
+
 
     }
 }

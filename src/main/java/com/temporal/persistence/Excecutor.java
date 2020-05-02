@@ -29,9 +29,19 @@ public class Excecutor {
         for(AbstractSqlBuilder abstractSqlBuilder : statements){
             try {
                 Statement statement = GlobalConnection.getConnection().createStatement();
-                ResultSet resultSet = statement.executeQuery(abstractSqlBuilder.toString());
+                String query[] = abstractSqlBuilder.toString().split(" ");
+                if(query[0].toLowerCase().equals("create")
+                        ||query[0].toLowerCase().equals("update")
+                        ||query[0].toLowerCase().equals("alter")
+                        ||query[0].toLowerCase().equals("use")
+                        ||query[0].toLowerCase().equals("insert")
+                )
+                statement.executeUpdate(abstractSqlBuilder.toString());
+                else{
+                    ResultSet resultSet = statement.executeQuery(abstractSqlBuilder.toString());
+                    resultSets.add(resultSet);
+                }
                 logger.info("[Success] : "+abstractSqlBuilder.toString());
-                resultSets.add(resultSet);
             } catch (SQLException e) {
                 logger.error("[Fail] "+e+" [QUERY] : "+abstractSqlBuilder);
             }
