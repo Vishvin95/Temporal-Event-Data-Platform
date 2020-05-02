@@ -49,6 +49,12 @@ public class PersistenceApp {
                 .addField(new Field("id", Field.Field_Type.VARCAHR).autoIncrement().primaryKey());
 
 
+        //Use Builder
+        UseBuilder ub = new UseBuilder("factory");
+        System.out.println(ub);
+        //CreateDatabase
+        CreateBuilder cd = new CreateBuilder().getDatabaseBuilder("factory");
+        System.out.println(cd);
 
 
 
