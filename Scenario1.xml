@@ -76,7 +76,7 @@
 			<to>boiler</to>
 		</relationship>
 		<relationship name="uses">
-			<type>nn</type>
+			<type>11</type>
 			<from>boiler</from>
 			<to>pump</to>
 		</relationship>

@@ -186,10 +186,15 @@ public class CreateQuery {
                 query=query+",";
                 if(event.getMoe()!=null)
                 {
-                    temporalQuery=temporalQuery+"create table "+event.getName()+"(id int not null unique auto_increment,value "+
+                    temporalQuery=temporalQuery+"create table "+domain.getName()+"_"+event.getName()+"(id int not null unique auto_increment,value "+
                                   dataType_Resolver.get(event.getDataType())+","+
                             domain.getName()+"_"+PrimaryKey_Resolver.get(domain.getName()).getKey()+" "+dataType_Resolver.get(PrimaryKey_Resolver.get(domain.getName()).getValue())+
                             ",valid_from datetime,valid_to datetime,transaction_enter datetime,transaction_delete datetime);";
+                    
+                    // Added constraint to history table
+                    temporalQuery=temporalQuery+"alter table "+domain.getName()+"_"+event.getName()+" add constraint foreign key(" + 
+                    					domain.getName()+"_"+PrimaryKey_Resolver.get(domain.getName()).getKey() +") references " + domain.getName()+"("
+                    					+ PrimaryKey_Resolver.get(domain.getName()).getKey() + ");";
                 }
             }
             query=query+"PRIMARY KEY("+PrimaryKey_Resolver.get(domain.getName()).getKey()+")";
@@ -208,10 +213,16 @@ public class CreateQuery {
                     helperQuery=helperQuery+"alter table "+domain.getName()+" add constraint foreign key("+
                             foreignKey+"_"+PrimaryKey_Resolver.get(foreignKey).getKey()+") references "+foreignKey+"("+PrimaryKey_Resolver.get(foreignKey).getKey()+");";
 
-                    helperQuery=helperQuery+"create table "+domain.getName()+"_"+foreignKey+"_hist("+"id int not null unique auto_increment,"+
+                    helperQuery=helperQuery+"create table "+domain.getName()+"_"+foreignKey+"("+"id int not null unique auto_increment,"+
                                 PrimaryKey_Resolver.get(foreignKey).getKey()+" "+dataType_Resolver.get(PrimaryKey_Resolver.get(foreignKey).getValue())+
-                                ","+PrimaryKey_Resolver.get(domain.getName()).getKey()+" "+dataType_Resolver.get(PrimaryKey_Resolver.get(domain.getName()).getValue())+
+                                ","+domain.getName() +"_"+PrimaryKey_Resolver.get(domain.getName()).getKey()+" "+dataType_Resolver.get(PrimaryKey_Resolver.get(domain.getName()).getValue())+
                                  ",valid_from datetime,valid_to datetime,transaction_enter datetime,transaction_delete datetime);";
+                    
+                    // Added constraint to history table
+                    helperQuery=helperQuery+"alter table "+ domain.getName()+"_"+foreignKey+" add constraint foreign key("  
+                    							+ domain.getName() +"_" + PrimaryKey_Resolver.get(domain.getName()).getKey() + ") references " + domain.getName() + "("
+                    							+ PrimaryKey_Resolver.get(domain.getName()).getKey() + ");";
+                    				
                 }
             }
 
@@ -225,16 +236,22 @@ public class CreateQuery {
                     helperQuery=helperQuery+"alter table "+domain.getName()+" add constraint foreign key("+
                             foreignKey+"_"+PrimaryKey_Resolver.get(foreignKey).getKey()+") references "+foreignKey+"("+PrimaryKey_Resolver.get(foreignKey).getKey()+");";
 
-                    helperQuery=helperQuery+"create table "+domain.getName()+"_"+foreignKey+"_hist("+"id int not null unique auto_increment,"+
+                    helperQuery=helperQuery+"create table "+domain.getName()+"_"+foreignKey+"("+"id int not null unique auto_increment,"+
                             PrimaryKey_Resolver.get(foreignKey).getKey()+" "+dataType_Resolver.get(PrimaryKey_Resolver.get(foreignKey).getValue())+
-                            ","+PrimaryKey_Resolver.get(domain.getName()).getKey()+" "+dataType_Resolver.get(PrimaryKey_Resolver.get(domain.getName()).getValue())+
+                            ","+domain.getName() +"_"+PrimaryKey_Resolver.get(domain.getName()).getKey()+" "+dataType_Resolver.get(PrimaryKey_Resolver.get(domain.getName()).getValue())+
                             ",valid_from datetime,valid_to datetime,transaction_enter datetime,transaction_delete datetime);";
+                    
+                 // Added constraint to history table
+                    helperQuery=helperQuery+"alter table "+ domain.getName()+"_"+foreignKey+" add constraint foreign key("  
+                    							+ domain.getName() +"_"+PrimaryKey_Resolver.get(domain.getName()).getKey() + ") references " + domain.getName() + "("
+                    							+ PrimaryKey_Resolver.get(domain.getName()).getKey() + ");";
                 }
             }
         }
         query=query+helperQuery;
         Iterator<Map.Entry<String, HashMap<String,String>>> parent = Relationship_Names.entrySet().iterator();
-
+        
+        // NN-Relationship generator
         while (parent.hasNext())
         {
             Map.Entry<String, HashMap<String, String>> parentPair = parent.next();
