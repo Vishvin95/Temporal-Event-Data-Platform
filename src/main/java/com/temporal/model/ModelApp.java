@@ -2,19 +2,10 @@ package com.temporal.model;
 
 import org.xml.sax.SAXException;
 
-import com.temporal.persistence.DescribeBuilder;
-import com.temporal.persistence.Excecutor;
-
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.UnmarshalException;
 
 import java.io.File;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.util.List;
-import java.util.concurrent.Executor;
 
 public class ModelApp {
 	public static void main(String... args) throws JAXBException, SAXException {
@@ -57,31 +48,31 @@ public class ModelApp {
 			invalidScenarioException.printStackTrace();
 		}
 
-		Event e1 = new Event("salary", EventDataType.DECIMAL,true,false,true);
-		Event e2 = new Event("empName", EventDataType.STRING,true,false,false);
-		Domain d1 = new Domain.DomainBuilder("employee",false, "empName").addEvent(e1).addEvent(e2).build();
-
-		Event e3 = new Event("dob", EventDataType.DECIMAL,false,false,false);
-		Event e4 = new Event("dependentName", EventDataType.STRING,true,false,false);
-		Domain d2 = new Domain.DomainBuilder("dependent",false, "dependentName").addEvent(e3).addEvent(e4).build();
-
-		Event e5 = new Event("cost", EventDataType.DECIMAL,true,false,true);
-		Event e6 = new Event("projectName", EventDataType.STRING,true,false,false);
-		Domain d3 = new Domain.DomainBuilder("project",false, "projectName").addEvent(e5).addEvent(e6).build();
-
-		Relationship r1 = new Relationship("works_on", RelationshipType.MANY_TO_MANY, d1, d3);
-		Relationship r2 = new Relationship("has", RelationshipType.ONE_TO_MANY, d1, d2);
-		
-		try {
-			Scenario scenario1 = new Scenario.ScenarioBuilder("Company").addDomain(d1).addDomain(d2).addDomain(d3)
-					.addRelationship(r1).addRelationship(r2).build();
-			System.out.println();
-			System.out.println("Manual Creation of Scenario");
-			System.out.println("---------------------------");
-			scenario1.printScenario();
-		} catch (InvalidScenarioException invalidScenarioException) {
-			invalidScenarioException.printStackTrace();
-		}
+//		Event e1 = new Event("salary", EventDataType.DECIMAL,true,false,true);
+//		Event e2 = new Event("empName", EventDataType.STRING,true,false,false);
+//		Domain d1 = new Domain.DomainBuilder("employee", "empName").addEvent(e1).addEvent(e2).build();
+//
+//		Event e3 = new Event("dob", EventDataType.DECIMAL,false,false,false);
+//		Event e4 = new Event("dependentName", EventDataType.STRING,true,false,false);
+//		Domain d2 = new Domain.DomainBuilder("dependent","dependentName").addEvent(e3).addEvent(e4).build();
+//
+//		Event e5 = new Event("cost", EventDataType.DECIMAL,true,false,true);
+//		Event e6 = new Event("projectName", EventDataType.STRING,true,false,false);
+//		Domain d3 = new Domain.DomainBuilder("project","projectName").addEvent(e5).addEvent(e6).build();
+//
+//		Relationship r1 = new Relationship("works_on", RelationshipType.MANY_TO_MANY, d1, d3);
+//		Relationship r2 = new Relationship("has", RelationshipType.ONE_TO_MANY, d1, d2);
+//		
+//		try {
+//			Scenario scenario1 = new Scenario.ScenarioBuilder("Company").addDomain(d1).addDomain(d2).addDomain(d3)
+//					.addRelationship(r1).addRelationship(r2).build();
+//			System.out.println();
+//			System.out.println("Manual Creation of Scenario");
+//			System.out.println("---------------------------");
+//			scenario1.printScenario();
+//		} catch (InvalidScenarioException invalidScenarioException) {
+//			invalidScenarioException.printStackTrace();
+//		}
 		
 		RawData data = RawData.loadFromXML(new File("RawData.xml"));
 		System.out.println();
