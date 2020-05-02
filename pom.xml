@@ -111,13 +111,6 @@
 			<version>2.13.1</version>
 		</dependency>
 
-<!--		&lt;!&ndash; https://mvnrepository.com/artifact/org.openjfx/javafx-base &ndash;&gt;-->
-<!--		<dependency>-->
-<!--			<groupId>org.openjfx</groupId>-->
-<!--			<artifactId>javafx-base</artifactId>-->
-<!--			<version>14.0.1</version>-->
-<!--		</dependency>-->
-
 		<!-- https://mvnrepository.com/artifact/org.openjfx/javafx -->
 		<dependency>
 			<groupId>org.openjfx</groupId>
@@ -125,6 +118,7 @@
 			<version>12</version>
 			<type>pom</type>
 		</dependency>
+
 	</dependencies>
 
 </project>

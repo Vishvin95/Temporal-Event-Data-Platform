@@ -33,7 +33,9 @@ public class Excecutor {
                 if(query[0].toLowerCase().equals("create")
                         ||query[0].toLowerCase().equals("update")
                         ||query[0].toLowerCase().equals("alter")
-                        ||query[0].toLowerCase().equals("use"))
+                        ||query[0].toLowerCase().equals("use")
+                        ||query[0].toLowerCase().equals("insert")
+                )
                 statement.executeUpdate(abstractSqlBuilder.toString());
                 else{
                     ResultSet resultSet = statement.executeQuery(abstractSqlBuilder.toString());

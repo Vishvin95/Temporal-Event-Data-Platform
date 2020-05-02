@@ -16,7 +16,7 @@ import java.util.List;
 
 public class Test {
     public static void main(String...args){
-        String[] query = new String[]{"use Factory","show tables","describe boiler"};
+        String[] query = new String[]{"use Factory","show tables","describe boiler","describe uses"};
         Excecutor excecutor = new Excecutor();
         Arrays.stream(query).map(GenericSqlBuilder::new).forEach(excecutor::addSqlQuery);
         List<ResultSet> execute = excecutor.execute();
