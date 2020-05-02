@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-
-<scenario name="Company">
+<scenario
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:noNamespaceSchemaLocation="src/main/resources/Scenario.xsd">
 	<domains>
 		<domain name="employee">
-			<temporal>false</temporal>
 			<event>
 				<name>empName</name>
 				<dataType>string</dataType>
@@ -16,7 +16,6 @@
 			<primaryKey>empName</primaryKey>
 		</domain>
 		<domain name="project">
-			<temporal>false</temporal>
 			<event>
 				<name>projectName</name>
 				<dataType>string</dataType>
@@ -28,16 +27,13 @@
 			<primaryKey>projectName</primaryKey>
 		</domain>
 		<domain name="dependent">
-			<temporal>false</temporal>
 			<event>
 				<name>dependentName</name>
 				<dataType>string</dataType>
-
 			</event>
 			<event>
 				<name>dob</name>
 				<dataType>date</dataType>
-
 			</event>
 			<primaryKey>dependentName</primaryKey>
 		</domain>

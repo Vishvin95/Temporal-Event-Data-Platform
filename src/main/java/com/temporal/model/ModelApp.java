@@ -1,11 +1,11 @@
 package com.temporal.model;
 
-import org.xml.sax.SAXException;
+import java.io.File;
 
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.UnmarshalException;
 
-import java.io.File;
+import org.xml.sax.SAXException;
 
 public class ModelApp {
 	public static void main(String... args) throws JAXBException, SAXException {
@@ -74,7 +74,7 @@ public class ModelApp {
 //			invalidScenarioException.printStackTrace();
 //		}
 		
-		RawData data = RawData.loadFromXML(new File("RawData.xml"));
+		InputData data = InputData.loadFromXML(new File("Insert.xml"));
 		System.out.println();
 	}
 }

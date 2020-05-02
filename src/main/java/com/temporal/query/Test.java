@@ -1,7 +1,6 @@
 package com.temporal.query;
 
 import com.temporal.model.InvalidScenarioException;
-import com.temporal.model.RawData;
 import com.temporal.model.Scenario;
 import com.temporal.persistence.Excecutor;
 import com.temporal.persistence.GenericSqlBuilder;
