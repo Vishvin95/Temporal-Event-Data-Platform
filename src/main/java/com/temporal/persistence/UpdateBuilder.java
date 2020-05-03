@@ -6,11 +6,15 @@ import java.util.List;
 public class UpdateBuilder extends AbstractSqlBuilder {
 
     private String table;
+    private List<String> sets;
+    private List<String> wheres;
 
-    private List<String> sets = new ArrayList<>();
-
-    private List<String> wheres = new ArrayList<>();
-
+    public UpdateBuilder(String table) {
+    	this.table = table;
+		sets = new ArrayList<String>();
+		wheres = new ArrayList<String>();
+	}
+    
     public UpdateBuilder set(String expression){
         sets.add(expression);
         return this;
