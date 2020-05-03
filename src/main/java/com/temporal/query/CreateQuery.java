@@ -150,18 +150,18 @@ public class CreateQuery {
     public String CreateScenario(Scenario scenario){
 
         ArrayList<Domain> domains=scenario.getDomains();
-
-        HashMap<String,String> dataType_Resolver=CreateQuery.DataTypeResolver();
+        String database_name=scenario.getName();
 
         String query="";
-        String helperQuery="";
         String temporalQuery="";
-        String database_name=scenario.getName();
+        String helperQuery="create table event_config(domain_name varchar(50),event_name varchar(50),datatype varchar(50)," +
+                "temporal boolean,overlap boolean,primary key(domain_name,event_name));";
 
         query=query+"create database "+database_name+";"+"use "+database_name+";";
 
         ArrayList<Relationship> relationships=scenario.getRelationships();
 
+        HashMap<String,String> dataType_Resolver=CreateQuery.DataTypeResolver();
         HashMap<String,HashMap<String,String>> Relationship_Names=new HashMap<>();
         HashMap<String,ArrayList<String>> Relationships_NxN= CreateQuery.get_Relationships_NxN(relationships,Relationship_Names);
         HashMap<String,ArrayList<String>> Relationships_Nx1= CreateQuery.get_Relationships_Nx1(relationships);
@@ -171,6 +171,7 @@ public class CreateQuery {
         for (Domain domain:domains)
         {
             query=query+"create table "+ domain.getName()+"(";
+            helperQuery=helperQuery;
             ArrayList<Event> events= domain.getEvents();
             for(Event event:events)
             {
@@ -191,11 +192,15 @@ public class CreateQuery {
                             domain.getName()+"_"+PrimaryKey_Resolver.get(domain.getName()).getKey()+" "+dataType_Resolver.get(PrimaryKey_Resolver.get(domain.getName()).getValue())+
                             ",valid_from datetime,valid_to datetime,transaction_enter datetime,transaction_delete datetime);";
                 }
+                helperQuery=helperQuery+"insert into event_config values("+'"'+domain.getName()+'"'+","+'"'+event.getName()+'"'+","+
+
+                        ");";
             }
             query=query+"PRIMARY KEY("+PrimaryKey_Resolver.get(domain.getName()).getKey()+")";
             query=query+");";
         }
         query=query+temporalQuery;
+        query=query+helperQuery;
         for(Domain domain:domains)
         {
             if(Relationships_1x1.containsKey(domain.getName()))
@@ -203,12 +208,12 @@ public class CreateQuery {
                 ArrayList<String> foreignKeys=Relationships_1x1.get(domain.getName());
                 for(String foreignKey:foreignKeys)
                 {
-                    helperQuery=helperQuery+"alter table "+domain.getName()+" add "+foreignKey+"_"+PrimaryKey_Resolver.get(foreignKey).getKey()+
+                    query=query+"alter table "+domain.getName()+" add "+foreignKey+"_"+PrimaryKey_Resolver.get(foreignKey).getKey()+
                             " "+dataType_Resolver.get(PrimaryKey_Resolver.get(foreignKey).getValue())+";";
-                    helperQuery=helperQuery+"alter table "+domain.getName()+" add constraint foreign key("+
+                    query=query+"alter table "+domain.getName()+" add constraint foreign key("+
                             foreignKey+"_"+PrimaryKey_Resolver.get(foreignKey).getKey()+") references "+foreignKey+"("+PrimaryKey_Resolver.get(foreignKey).getKey()+");";
 
-                    helperQuery=helperQuery+"create table "+domain.getName()+"_"+foreignKey+"_hist("+"id int not null unique auto_increment,"+
+                    query=query+"create table "+domain.getName()+"_"+foreignKey+"_hist("+"id int not null unique auto_increment,"+
                                 PrimaryKey_Resolver.get(foreignKey).getKey()+" "+dataType_Resolver.get(PrimaryKey_Resolver.get(foreignKey).getValue())+
                                 ","+PrimaryKey_Resolver.get(domain.getName()).getKey()+" "+dataType_Resolver.get(PrimaryKey_Resolver.get(domain.getName()).getValue())+
                                  ",valid_from datetime,valid_to datetime,transaction_enter datetime,transaction_delete datetime);";
@@ -220,19 +225,18 @@ public class CreateQuery {
                 ArrayList<String> foreignKeys=Relationships_Nx1.get(domain.getName());
                 for(String foreignKey:foreignKeys)
                 {
-                    helperQuery=helperQuery+"alter table "+domain.getName()+" add "+foreignKey+"_"+PrimaryKey_Resolver.get(foreignKey).getKey()+
+                    query=query+"alter table "+domain.getName()+" add "+foreignKey+"_"+PrimaryKey_Resolver.get(foreignKey).getKey()+
                             " "+dataType_Resolver.get(PrimaryKey_Resolver.get(foreignKey).getValue())+";";
-                    helperQuery=helperQuery+"alter table "+domain.getName()+" add constraint foreign key("+
+                    query=query+"alter table "+domain.getName()+" add constraint foreign key("+
                             foreignKey+"_"+PrimaryKey_Resolver.get(foreignKey).getKey()+") references "+foreignKey+"("+PrimaryKey_Resolver.get(foreignKey).getKey()+");";
 
-                    helperQuery=helperQuery+"create table "+domain.getName()+"_"+foreignKey+"_hist("+"id int not null unique auto_increment,"+
+                    query=query+"create table "+domain.getName()+"_"+foreignKey+"_hist("+"id int not null unique auto_increment,"+
                             PrimaryKey_Resolver.get(foreignKey).getKey()+" "+dataType_Resolver.get(PrimaryKey_Resolver.get(foreignKey).getValue())+
                             ","+PrimaryKey_Resolver.get(domain.getName()).getKey()+" "+dataType_Resolver.get(PrimaryKey_Resolver.get(domain.getName()).getValue())+
                             ",valid_from datetime,valid_to datetime,transaction_enter datetime,transaction_delete datetime);";
                 }
             }
         }
-        query=query+helperQuery;
         Iterator<Map.Entry<String, HashMap<String,String>>> parent = Relationship_Names.entrySet().iterator();
 
         while (parent.hasNext())
