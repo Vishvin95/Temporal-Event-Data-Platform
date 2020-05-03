@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <inputData
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:noNamespaceSchemaLocation="src/main/resources/RawData.xsd">
+	xsi:noNamespaceSchemaLocation="src/main/resources/Insert.xsd">
 
 	<table name="boiler">
 		<row>

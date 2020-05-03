@@ -8,7 +8,6 @@ import javax.xml.XMLConstants;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
-import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlRootElement;
@@ -21,15 +20,13 @@ import org.xml.sax.SAXException;
 public class Scenario {
 
 	private ArrayList<Domain> domains;
-	private ArrayList<Relationship> relationships;
-	private String name;
+	private ArrayList<Relationship> relationships;	
 
 	public Scenario() {
 
 	}
 
 	private Scenario(ScenarioBuilder scenarioBuilder) {
-		this.name = scenarioBuilder.name;
 		this.domains = scenarioBuilder.domains;
 		this.relationships = scenarioBuilder.relationships;
 	}
@@ -54,15 +51,6 @@ public class Scenario {
 		this.relationships = relationships;
 	}
 
-	@XmlAttribute
-	public String getName() {
-		return name;
-	}
-
-	public void setName(String name) {
-		this.name = name;
-	}
-
 	/**
 	 * Method that takes XML file as input and returns Scenario object
 	 * 
@@ -80,7 +68,7 @@ public class Scenario {
 
 		// Tarang : Alternate way of getting xsd
 		Schema scenarioSchema = sf
-				.newSchema(Thread.currentThread().getContextClassLoader().getResource("ScenarioSchema.xsd"));
+				.newSchema(Thread.currentThread().getContextClassLoader().getResource("Scenario.xsd"));
 
 // 		Unmarshal from XML to Object		
 		JAXBContext jaxbContext = JAXBContext.newInstance(Scenario.class);
@@ -93,7 +81,7 @@ public class Scenario {
 			Scenario.validateScenario(scenario);
 		}catch (DuplicateRelationshipException e) {
 			e.printStackTrace();
-			throw new InvalidScenarioException("Invalid Scenario: " + scenario.getName());
+			throw new InvalidScenarioException("Invalid Scenario: " + scenario);
 		}
 		return scenario;
 	}
@@ -115,8 +103,6 @@ public class Scenario {
 	 * Debug method used to check, if scenario is loaded correctly
 	 */
 	public void printScenario() {
-		System.out.println("Database:" + this.getName());
-
 		System.out.println();
 		System.out.println("Tables:");
 		for (Domain domain : this.getDomains()) {
@@ -132,11 +118,9 @@ public class Scenario {
 
 	public static class ScenarioBuilder {
 		private ArrayList<Domain> domains;
-		private ArrayList<Relationship> relationships;
-		private final String name;
+		private ArrayList<Relationship> relationships;		
 
-		public ScenarioBuilder(String name) {
-			this.name = name;
+		public ScenarioBuilder() {		
 			this.domains = new ArrayList<Domain>();
 			this.relationships = new ArrayList<Relationship>();
 		}
@@ -159,7 +143,7 @@ public class Scenario {
 				Scenario.validateScenario(scenario);
 			}catch (DuplicateRelationshipException e) {
 				e.printStackTrace();
-				throw new InvalidScenarioException("Invalid scenario: " + scenario.getName());
+				throw new InvalidScenarioException("Invalid scenario: " + scenario);
 			}
 			return scenario;
 		}

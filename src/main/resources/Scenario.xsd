@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
 	elementFormDefault="qualified">
-
 	<xs:element name="scenario">
 		<xs:complexType>
 			<xs:sequence>
@@ -91,7 +90,6 @@
 					</xs:complexType>
 				</xs:element>
 			</xs:sequence>
-			<xs:attribute name="name" type="xs:string" />
 		</xs:complexType>
 		<xs:key name="domainKey">
 			<xs:selector xpath="./domains/domain" />

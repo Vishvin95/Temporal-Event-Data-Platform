@@ -150,14 +150,13 @@ public class CreateQuery {
     public String CreateScenario(Scenario scenario){
 
         ArrayList<Domain> domains=scenario.getDomains();
-        String database_name=scenario.getName();
 
         String query="";
         String temporalQuery="";
         String helperQuery="create table event_config(domain_name varchar(50),event_name varchar(50),datatype varchar(50)," +
                 "temporal boolean,overlap boolean,primary key(domain_name,event_name));";
 
-        query=query+"create database "+database_name+";"+"use "+database_name+";";
+
 
         ArrayList<Relationship> relationships=scenario.getRelationships();
 
@@ -187,10 +186,15 @@ public class CreateQuery {
                 query=query+",";
                 if(event.getMoe()!=null)
                 {
-                    temporalQuery=temporalQuery+"create table "+event.getName()+"(id int not null unique auto_increment,value "+
+                    temporalQuery=temporalQuery+"create table "+domain.getName()+"_"+event.getName()+"(id int not null unique auto_increment,value "+
                                   dataType_Resolver.get(event.getDataType())+","+
                             domain.getName()+"_"+PrimaryKey_Resolver.get(domain.getName()).getKey()+" "+dataType_Resolver.get(PrimaryKey_Resolver.get(domain.getName()).getValue())+
                             ",valid_from datetime,valid_to datetime,transaction_enter datetime,transaction_delete datetime);";
+                    
+                    // Added constraint to history table
+                    temporalQuery=temporalQuery+"alter table "+domain.getName()+"_"+event.getName()+" add constraint foreign key(" + 
+                    					domain.getName()+"_"+PrimaryKey_Resolver.get(domain.getName()).getKey() +") references " + domain.getName()+"("
+                    					+ PrimaryKey_Resolver.get(domain.getName()).getKey() + ");";
                 }
                 helperQuery=helperQuery+"insert into event_config values("+'"'+domain.getName()+'"'+","+'"'+event.getName()+'"'+","+
 
@@ -213,10 +217,20 @@ public class CreateQuery {
                     query=query+"alter table "+domain.getName()+" add constraint foreign key("+
                             foreignKey+"_"+PrimaryKey_Resolver.get(foreignKey).getKey()+") references "+foreignKey+"("+PrimaryKey_Resolver.get(foreignKey).getKey()+");";
 
-                    query=query+"create table "+domain.getName()+"_"+foreignKey+"_hist("+"id int not null unique auto_increment,"+
+
+                    query=query+"create table "+domain.getName()+"_"+foreignKey+"_hist("+"id int not null unique auto_increment,";
+
+                    query=query+"create table "+domain.getName()+"_"+foreignKey+"("+"id int not null unique auto_increment,"+
+
                                 PrimaryKey_Resolver.get(foreignKey).getKey()+" "+dataType_Resolver.get(PrimaryKey_Resolver.get(foreignKey).getValue())+
-                                ","+PrimaryKey_Resolver.get(domain.getName()).getKey()+" "+dataType_Resolver.get(PrimaryKey_Resolver.get(domain.getName()).getValue())+
+                                ","+domain.getName() +"_"+PrimaryKey_Resolver.get(domain.getName()).getKey()+" "+dataType_Resolver.get(PrimaryKey_Resolver.get(domain.getName()).getValue())+
                                  ",valid_from datetime,valid_to datetime,transaction_enter datetime,transaction_delete datetime);";
+                    
+                    // Added constraint to history table
+                    helperQuery=helperQuery+"alter table "+ domain.getName()+"_"+foreignKey+" add constraint foreign key("  
+                    							+ domain.getName() +"_" + PrimaryKey_Resolver.get(domain.getName()).getKey() + ") references " + domain.getName() + "("
+                    							+ PrimaryKey_Resolver.get(domain.getName()).getKey() + ");";
+                    				
                 }
             }
 
@@ -230,15 +244,25 @@ public class CreateQuery {
                     query=query+"alter table "+domain.getName()+" add constraint foreign key("+
                             foreignKey+"_"+PrimaryKey_Resolver.get(foreignKey).getKey()+") references "+foreignKey+"("+PrimaryKey_Resolver.get(foreignKey).getKey()+");";
 
-                    query=query+"create table "+domain.getName()+"_"+foreignKey+"_hist("+"id int not null unique auto_increment,"+
+
+                    query=query+"create table "+domain.getName()+"_"+foreignKey+"_hist("+"id int not null unique auto_increment,";
+
+                    query=query+"create table "+domain.getName()+"_"+foreignKey+"("+"id int not null unique auto_increment,"+
+
                             PrimaryKey_Resolver.get(foreignKey).getKey()+" "+dataType_Resolver.get(PrimaryKey_Resolver.get(foreignKey).getValue())+
-                            ","+PrimaryKey_Resolver.get(domain.getName()).getKey()+" "+dataType_Resolver.get(PrimaryKey_Resolver.get(domain.getName()).getValue())+
+                            ","+domain.getName() +"_"+PrimaryKey_Resolver.get(domain.getName()).getKey()+" "+dataType_Resolver.get(PrimaryKey_Resolver.get(domain.getName()).getValue())+
                             ",valid_from datetime,valid_to datetime,transaction_enter datetime,transaction_delete datetime);";
+                    
+                 // Added constraint to history table
+                    helperQuery=helperQuery+"alter table "+ domain.getName()+"_"+foreignKey+" add constraint foreign key("  
+                    							+ domain.getName() +"_"+PrimaryKey_Resolver.get(domain.getName()).getKey() + ") references " + domain.getName() + "("
+                    							+ PrimaryKey_Resolver.get(domain.getName()).getKey() + ");";
                 }
             }
         }
         Iterator<Map.Entry<String, HashMap<String,String>>> parent = Relationship_Names.entrySet().iterator();
-
+        
+        // NN-Relationship generator
         while (parent.hasNext())
         {
             Map.Entry<String, HashMap<String, String>> parentPair = parent.next();

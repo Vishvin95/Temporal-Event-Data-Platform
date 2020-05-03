@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-
-<scenario name="Factory">
+<scenario
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:noNamespaceSchemaLocation="src/main/resources/Scenario.xsd">
 	<domains>
 		<domain name="supervisor">
 			<event>
@@ -76,7 +77,7 @@
 			<to>boiler</to>
 		</relationship>
 		<relationship name="uses">
-			<type>nn</type>
+			<type>11</type>
 			<from>boiler</from>
 			<to>pump</to>
 		</relationship>

@@ -14,26 +14,30 @@ import javax.xml.validation.SchemaFactory;
 import org.xml.sax.SAXException;
 
 @XmlRootElement(name = "inputData")
-public class RawData {
+public class InputData {
 	private Table table;
+	
+	public InputData() {
+	
+	}
 
 	@XmlElement(name="table")
-	public Table getRawReadings() {
+	public Table getTable() {
 		return table;
 	}
 
-	public void setRawReadings(Table table) {
+	public void setTable(Table table) {
 		this.table = table;
 	}
 
-	public static RawData loadFromXML(File file) throws SAXException, JAXBException {
+	public static InputData loadFromXML(File file) throws SAXException, JAXBException {
 		SchemaFactory sf = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
 		Schema scenarioSchema = sf
-				.newSchema(Thread.currentThread().getContextClassLoader().getResource("RawData.xsd"));
-		JAXBContext jaxbContext = JAXBContext.newInstance(RawData.class);
+				.newSchema(Thread.currentThread().getContextClassLoader().getResource("Insert.xsd"));
+		JAXBContext jaxbContext = JAXBContext.newInstance(InputData.class);
 		Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
 		unmarshaller.setSchema(scenarioSchema);
-		RawData data = (RawData) unmarshaller.unmarshal(file);
+		InputData data = (InputData) unmarshaller.unmarshal(file);
 		return data;
 	}
 }
