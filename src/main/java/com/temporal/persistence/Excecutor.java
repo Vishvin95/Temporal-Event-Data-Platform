@@ -24,7 +24,7 @@ public class Excecutor {
         this.statements.addLast(sqlBuilder);
     }
 
-    public List<ResultSet> execute(){
+    public List<ResultSet> execute() throws SQLException {
         List<ResultSet> resultSets = new ArrayList<>();
         for(AbstractSqlBuilder abstractSqlBuilder : statements){
             try {
@@ -44,6 +44,7 @@ public class Excecutor {
                 logger.info("[Success] : "+abstractSqlBuilder.toString());
             } catch (SQLException e) {
                 logger.error("[Fail] "+e+" [QUERY] : "+abstractSqlBuilder);
+                throw e;
             }
         }
         return resultSets;
