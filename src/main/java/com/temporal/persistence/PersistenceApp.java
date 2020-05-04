@@ -52,6 +52,7 @@ public class PersistenceApp {
         //Use Builder
         UseBuilder ub = new UseBuilder("factory");
         System.out.println(ub);
+        
         //CreateDatabase
         CreateBuilder cd = new CreateBuilder().getDatabaseBuilder("factory");
         System.out.println(cd);
@@ -80,7 +81,12 @@ public class PersistenceApp {
             Arrays.stream(queries)
                     .map(GenericSqlBuilder::new)
                     .forEach(excecutor::addSqlQuery);
-            List<ResultSet> execute = excecutor.execute();
+            List<ResultSet> execute = null;
+            try {
+                execute = excecutor.execute();
+            } catch (SQLException exception) {
+                exception.printStackTrace();
+            }
             execute.forEach(DBTablePrinter::printResultSet);
 
         } catch (SAXException | JAXBException | InvalidScenarioException e) {
