@@ -264,12 +264,6 @@ public class CreateQuery {
                         childPair.getKey()+"_"+PrimaryKey_Resolver.get(childPair.getKey()).getKey()+" "+
                         dataType_Resolver.get(PrimaryKey_Resolver.get(childPair.getKey()).getValue())+","+
 
-//                        "foreign key ("+parentPair.getKey()+"_"+PrimaryKey_Resolver.get(parentPair.getKey()).getKey()+") references "
-//                        +parentPair.getKey()+"("+PrimaryKey_Resolver.get(parentPair.getKey()).getKey()+"),"+
-//
-//                        "foreign key ("+childPair.getKey()+"_"+PrimaryKey_Resolver.get(childPair.getKey()).getKey()+") references "
-//                        +childPair.getKey()+"("+PrimaryKey_Resolver.get(childPair.getKey()).getKey()+"),"+
-
                         "PRIMARY KEY ("+parentPair.getKey()+"_"+PrimaryKey_Resolver.get(parentPair.getKey()).getKey()+","+
                         childPair.getKey()+"_"+PrimaryKey_Resolver.get(childPair.getKey()).getKey()+")"+
 

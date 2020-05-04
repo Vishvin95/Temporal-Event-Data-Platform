@@ -81,7 +81,12 @@ public class PersistenceApp {
             Arrays.stream(queries)
                     .map(GenericSqlBuilder::new)
                     .forEach(excecutor::addSqlQuery);
-            List<ResultSet> execute = excecutor.execute();
+            List<ResultSet> execute = null;
+            try {
+                execute = excecutor.execute();
+            } catch (SQLException exception) {
+                exception.printStackTrace();
+            }
             execute.forEach(DBTablePrinter::printResultSet);
 
         } catch (SAXException | JAXBException | InvalidScenarioException e) {

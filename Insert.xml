@@ -6,7 +6,7 @@
 	<table name="boiler">
 		<row>
 			<column>
-				<key>boilderCode</key>
+				<key>boilerCode</key>
 				<value>B1</value>
 			</column>
 			<column>

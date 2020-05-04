@@ -11,6 +11,7 @@ package com.temporal.persistence;
 */
 
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.List;
 
@@ -19,7 +20,12 @@ public class Test {
         String[] query = new String[]{"use Factory","show tables","describe boiler","describe uses"};
         Excecutor excecutor = new Excecutor();
         Arrays.stream(query).map(GenericSqlBuilder::new).forEach(excecutor::addSqlQuery);
-        List<ResultSet> execute = excecutor.execute();
+        List<ResultSet> execute = null;
+        try {
+            execute = excecutor.execute();
+        } catch (SQLException exception) {
+            exception.printStackTrace();
+        }
         execute.forEach(DBTablePrinter::printResultSet);
     }
 }
