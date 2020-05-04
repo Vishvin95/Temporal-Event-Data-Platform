@@ -2,12 +2,15 @@ package com.temporal.model;
 
 import org.xml.sax.SAXException;
 
+import com.temporal.persistence.DBTablePrinter;
 import com.temporal.query.CreateQuery;
+import com.temporal.query.SelectQuery;
 
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.UnmarshalException;
 
 import java.io.File;
+import java.sql.ResultSet;
 import java.util.StringTokenizer;
 
 public class ModelApp {
@@ -24,7 +27,7 @@ public class ModelApp {
 			String s = createQuery.CreateScenario(scenario);
 			StringTokenizer st = new StringTokenizer(s,";");
 			while(st.hasMoreTokens())			
-				System.out.println(st.nextToken() + "\n");
+				System.out.println(st.nextToken() + ";\n");
 			
 		} catch (UnmarshalException unmarshalException) {
 			unmarshalException.printStackTrace();
@@ -84,7 +87,22 @@ public class ModelApp {
 //			invalidScenarioException.printStackTrace();
 //		}
 		
+		// Inserting input file
 		InputData data = InputData.loadFromXML(new File("Insert.xml"));
 		System.out.println();		
+		
+		// Running normal select queries
+		try {
+			ResultSet simpleSelect = SelectQuery.select("select * from boiler");
+			DBTablePrinter.printResultSet(simpleSelect);
+			
+			ResultSet selectWithJoin = SelectQuery.select("select boilerCode, temperature, boiler.supId, name from boiler "
+															+ "inner join supervisor on boiler.supId = supervisor.supId");					
+			DBTablePrinter.printResultSet(selectWithJoin);
+			
+			
+		}catch (Exception e) {
+			e.printStackTrace();
+		}
 	}
 }

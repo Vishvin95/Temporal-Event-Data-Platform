@@ -176,9 +176,9 @@ public class CreateQuery {
                 if(event.getMoe()!=null)
                 {
                     temporalQuery=temporalQuery+"create table "+domain.getName()+"_"+event.getName()+"(id int not null unique auto_increment,value "+
-                                  dataType_Resolver.get(event.getDataType())+","+
-                                  "_"+PrimaryKey_Resolver.get(domain.getName()).getKey()+" "+dataType_Resolver.get(PrimaryKey_Resolver.get(domain.getName()).getValue())+
-                            ",valid_from datetime,valid_to datetime,transaction_enter datetime,transaction_delete datetime);";
+                                  dataType_Resolver.get(event.getDataType())+","+ PrimaryKey_Resolver.get(domain.getName()).getKey()+
+                                  " "+dataType_Resolver.get(PrimaryKey_Resolver.get(domain.getName()).getValue())+
+                                  ",valid_from datetime,valid_to datetime,transaction_enter datetime,transaction_delete datetime);";
 
                     if(event.getMoe().isOverlap())
                         EventConfigQuery=EventConfigQuery+"true,true);";
