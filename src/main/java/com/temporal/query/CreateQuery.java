@@ -3,6 +3,8 @@ package com.temporal.query;
 import com.temporal.model.Domain;
 import com.temporal.model.Event;
 import com.temporal.model.Scenario;
+import com.temporal.persistence.SelectBuilder;
+import com.temporal.persistence.ViewBuilder;
 import com.temporal.model.Relationship;
 import javafx.util.Pair;
 
@@ -155,15 +157,18 @@ public class CreateQuery {
         HashMap<String,ArrayList<String>> Relationships_Nx1= CreateQuery.get_Relationships_Nx1(relationships);
         HashMap<String,ArrayList<String>> Relationships_1x1= CreateQuery.get_Relationships_1x1(relationships);
         HashMap<String,Pair<String,String>> PrimaryKey_Resolver=CreateQuery.PrimaryKeyResolver(domains);
-
+        HashMap<String,SelectBuilder> views = new HashMap<String, SelectBuilder>();
+        
         for (Domain domain:domains)
         {
+        	// Preparing select for the current domain
+        	SelectBuilder select = new SelectBuilder();
+        	select.from(domain.getName());        	
+        	
             query=query+"create table "+ domain.getName()+"(";
             ArrayList<Event> events= domain.getEvents();
             for(Event event:events)
             {
-
-
                 EventConfigQuery=EventConfigQuery+"insert into event_config values("+'"'+domain.getName()+'"'+","+'"'+event.getName()+'"'+","+
                         '"'+dataType_Resolver.get(event.getDataType())+'"'+",";
 
@@ -172,13 +177,19 @@ public class CreateQuery {
                 {
                     temporalQuery=temporalQuery+"create table "+domain.getName()+"_"+event.getName()+"(id int not null unique auto_increment,value "+
                                   dataType_Resolver.get(event.getDataType())+","+
-                            domain.getName()+"_"+PrimaryKey_Resolver.get(domain.getName()).getKey()+" "+dataType_Resolver.get(PrimaryKey_Resolver.get(domain.getName()).getValue())+
+                                  "_"+PrimaryKey_Resolver.get(domain.getName()).getKey()+" "+dataType_Resolver.get(PrimaryKey_Resolver.get(domain.getName()).getValue())+
                             ",valid_from datetime,valid_to datetime,transaction_enter datetime,transaction_delete datetime);";
 
                     if(event.getMoe().isOverlap())
                         EventConfigQuery=EventConfigQuery+"true,true);";
                     else
                         EventConfigQuery=EventConfigQuery+"true,false);";
+                    
+                    select.column(domain.getName()+"_"+event.getName() + ".value as " + event.getName());
+                    select.join(domain.getName()+"_"+event.getName() + " on " + domain.getName()+"."+PrimaryKey_Resolver.get(domain.getName()).getKey() 
+                    				+ " = " + domain.getName()+"_"+event.getName() + "." + PrimaryKey_Resolver.get(domain.getName()).getKey());
+                    select.where(domain.getName()+"_"+event.getName()+".valid_from <= now()");
+                    select.where("now() < " + domain.getName()+"_"+event.getName()+".valid_to");
                 }
                 else
                 {
@@ -194,6 +205,8 @@ public class CreateQuery {
                     }
 
                     query=query+",";
+                    
+                    select.column(domain.getName()+"."+event.getName() + " as " + event.getName());
                 }
 
 
@@ -203,6 +216,7 @@ public class CreateQuery {
 
             DomainConfigQuery=DomainConfigQuery+"insert into domain_config values("+'"'+domain.getName()+'"'+
                     ","+'"'+PrimaryKey_Resolver.get(domain.getName()).getKey()+'"'+");";
+            views.put(domain.getName(), select);
         }
 
         for(Domain domain:domains)
@@ -218,11 +232,17 @@ public class CreateQuery {
                             foreignKey+"_"+PrimaryKey_Resolver.get(foreignKey).getKey()+") references "+foreignKey+"("+PrimaryKey_Resolver.get(foreignKey).getKey()+");";
 
                     query=query+"create table "+domain.getName()+"_"+PrimaryKey_Resolver.get(foreignKey).getKey()+"("+"id int not null unique auto_increment,"+
-
                                 PrimaryKey_Resolver.get(foreignKey).getKey()+" "+dataType_Resolver.get(PrimaryKey_Resolver.get(foreignKey).getValue())+
                                 ","+PrimaryKey_Resolver.get(domain.getName()).getKey()+" "+dataType_Resolver.get(PrimaryKey_Resolver.get(domain.getName()).getValue())+
                                  ",valid_from datetime,valid_to datetime,transaction_enter datetime,transaction_delete datetime);";
-
+                    
+                    views.get(domain.getName())
+                    		.column(domain.getName()+"."+foreignKey+"_"+PrimaryKey_Resolver.get(foreignKey).getKey() + " as "+ PrimaryKey_Resolver.get(foreignKey).getKey())
+                    		.where(domain.getName()+"_"+PrimaryKey_Resolver.get(foreignKey).getKey()+".valid_from <= now()")
+                    		.where("now() < "+domain.getName()+"_"+PrimaryKey_Resolver.get(foreignKey).getKey()+".valid_to")
+                    		.join(domain.getName()+"_"+PrimaryKey_Resolver.get(foreignKey).getKey()+" on " + domain.getName()+"."+ 
+                    				PrimaryKey_Resolver.get(domain.getName()).getKey() + 
+                    				" = " + domain.getName()+"_"+PrimaryKey_Resolver.get(foreignKey).getKey()+"." + PrimaryKey_Resolver.get(domain.getName()).getKey());                    		
                     				
                 }
             }
@@ -242,6 +262,14 @@ public class CreateQuery {
                             PrimaryKey_Resolver.get(foreignKey).getKey()+" "+dataType_Resolver.get(PrimaryKey_Resolver.get(foreignKey).getValue())+
                             ","+PrimaryKey_Resolver.get(domain.getName()).getKey()+" "+dataType_Resolver.get(PrimaryKey_Resolver.get(domain.getName()).getValue())+
                             ",valid_from datetime,valid_to datetime,transaction_enter datetime,transaction_delete datetime);";
+                    
+                    views.get(domain.getName())
+            		.column(domain.getName()+"."+foreignKey+"_"+PrimaryKey_Resolver.get(foreignKey).getKey() + " as "+ PrimaryKey_Resolver.get(foreignKey).getKey())
+            		.where(domain.getName()+"_"+PrimaryKey_Resolver.get(foreignKey).getKey()+".valid_from <= now()")
+            		.where("now() < "+domain.getName()+"_"+PrimaryKey_Resolver.get(foreignKey).getKey()+".valid_to")
+            		.join(domain.getName()+"_"+PrimaryKey_Resolver.get(foreignKey).getKey()+" on " + domain.getName()+"."+ 
+            				PrimaryKey_Resolver.get(domain.getName()).getKey() +
+            				" = " + domain.getName()+"_"+PrimaryKey_Resolver.get(foreignKey).getKey()+"." + PrimaryKey_Resolver.get(domain.getName()).getKey()); 
 
                 }
             }
@@ -278,6 +306,14 @@ public class CreateQuery {
             }
         }
 
-        return query+temporalQuery+EventConfigQuery+DomainConfigQuery;
+        // Adding view creation queries to final query set
+        StringBuilder viewQuery = new StringBuilder();
+        for(Map.Entry<String, SelectBuilder> select: views.entrySet())
+        {
+        	ViewBuilder view = new ViewBuilder(select.getKey()+"_v", select.getValue());
+        	viewQuery.append(view.toString()+";");
+        }        
+        
+        return query+temporalQuery+EventConfigQuery+DomainConfigQuery+viewQuery;
     }
 }

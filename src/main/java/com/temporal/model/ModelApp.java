@@ -2,10 +2,13 @@ package com.temporal.model;
 
 import org.xml.sax.SAXException;
 
+import com.temporal.query.CreateQuery;
+
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.UnmarshalException;
 
 import java.io.File;
+import java.util.StringTokenizer;
 
 public class ModelApp {
 	public static void main(String... args) throws JAXBException, SAXException {
@@ -16,6 +19,13 @@ public class ModelApp {
 			System.out.println("------------------------");
 			Scenario scenario = Scenario.loadFromXML(file);
 			scenario.printScenario();
+			
+			CreateQuery createQuery = new CreateQuery();
+			String s = createQuery.CreateScenario(scenario);
+			StringTokenizer st = new StringTokenizer(s,";");
+			while(st.hasMoreTokens())			
+				System.out.println(st.nextToken() + "\n");
+			
 		} catch (UnmarshalException unmarshalException) {
 			unmarshalException.printStackTrace();
 		} catch (InvalidScenarioException invalidScenarioException) {
@@ -74,7 +84,7 @@ public class ModelApp {
 //			invalidScenarioException.printStackTrace();
 //		}
 		
-		InputData data = InputData.loadFromXML(new File("RawData.xml"));
-		System.out.println();
+		InputData data = InputData.loadFromXML(new File("Insert.xml"));
+		System.out.println();		
 	}
 }
