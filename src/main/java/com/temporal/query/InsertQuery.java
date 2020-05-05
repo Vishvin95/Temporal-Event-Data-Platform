@@ -9,6 +9,7 @@ import javafx.util.Pair;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.SQLIntegrityConstraintViolationException;
+import java.sql.Timestamp;
 import java.util.*;
 
 public class InsertQuery  {
@@ -71,6 +72,16 @@ public class InsertQuery  {
 
     }
 
+    public static String getValidFromTimestamp(Date date)
+    {
+        return date == null ? '"'+"curdate()"+'"' : '"'+new Timestamp(date.getTime()).toString()+'"';
+    }
+
+    public static String getValidToTimestamp(Date date)
+    {
+        return date == null ? '"'+"9999-12-31 23:59:59"+'"' : '"'+new Timestamp(date.getTime()).toString()+'"';
+    }
+
     public static void insert(Table table) throws SQLException {
 
         String HistoryInsert="";
@@ -98,8 +109,9 @@ public class InsertQuery  {
             if(Integer.parseInt(temporal_resolver.get(column.getKey()).getValue())==1)
             {
                 TemporalInsert=TemporalInsert+"insert into "+table.getName()+"_"+column.getKey()+"("
-                        		+pk+",value) values("+valueMaker(pk,pkValue,temporal_resolver)+","+
-                valueMaker(column.getKey(),column.getValue(),temporal_resolver)+");";
+                        		+pk+",value,valid_from,valid_to,transaction_enter,transaction_delete) values("+valueMaker(pk,pkValue,temporal_resolver)+","+
+                valueMaker(column.getKey(),column.getValue(),temporal_resolver)+","+getValidFromTimestamp(column.getValidFrom())+
+                        ","+getValidToTimestamp(column.getValidTo())+",curdate(),"+'"'+"9999-12-31 23:59:59"+'"'+");";
             }
         }
 
@@ -113,8 +125,11 @@ public class InsertQuery  {
                 MainInsertHelper=MainInsertHelper+","+valueMaker(column.getKey(),column.getValue(),temporal_resolver);
                 if(key_resolver.containsKey(column.getKey()))
                 {
-                    HistoryInsert=HistoryInsert+"insert into "+table.getName()+"_"+column.getKey()+"("+pk+","+column.getKey()+") values("+
-                            valueMaker(pk,pkValue,temporal_resolver)+","+valueMaker(column.getKey(),column.getValue(),temporal_resolver)+");";
+                    HistoryInsert=HistoryInsert+"insert into "+table.getName()+"_"+column.getKey()+"("+pk+","+column.getKey()+
+                            ",valid_from,valid_to,transaction_enter,transaction_delete) "+"values("+
+                            valueMaker(pk,pkValue,temporal_resolver)+","+valueMaker(column.getKey(),column.getValue(),temporal_resolver)+","+
+                            getValidFromTimestamp(column.getValidFrom())+","+getValidToTimestamp(column.getValidTo())+",curdate(),"+'"'+"9999-12-31 23:59:59"+'"'+
+                            ");";
                 }
             }
         }
