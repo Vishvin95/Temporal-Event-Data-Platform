@@ -19,8 +19,6 @@ public class InsertQuery  {
         excecutor.addSqlQuery(new GenericSqlBuilder("select * from domain_config"));
         List<ResultSet> resultSets = excecutor.execute();
 
-        ArrayList<String> results = new ArrayList<String>();
-
         for(ResultSet rs:resultSets)
         {
             while (rs.next())
@@ -44,7 +42,6 @@ public class InsertQuery  {
             {
                 Pair<String,String> pair =new Pair<>(rs.getString(3),rs.getString(4));
                 map.put(rs.getString(2),pair);
-//                System.out.println(map.get(rs.getString(2)).getValue());
             }
         }
 
@@ -92,6 +89,7 @@ public class InsertQuery  {
             {
                  pk=column.getKey();
                  pkValue=column.getValue();
+                 break;
             }
         }
 
@@ -99,8 +97,8 @@ public class InsertQuery  {
         {
             if(Integer.parseInt(temporal_resolver.get(column.getKey()).getValue())==1)
             {
-                TemporalInsert=TemporalInsert+"insert into "+table.getName()+"_"+column.getKey()+"("+
-                        table.getName()+"_"+pk+",value) values("+valueMaker(pk,pkValue,temporal_resolver)+","+
+                TemporalInsert=TemporalInsert+"insert into "+table.getName()+"_"+column.getKey()+"("
+                        		+pk+",value) values("+valueMaker(pk,pkValue,temporal_resolver)+","+
                 valueMaker(column.getKey(),column.getValue(),temporal_resolver)+");";
             }
         }

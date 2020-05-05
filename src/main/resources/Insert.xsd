@@ -21,8 +21,10 @@
 																memberTypes="xs:boolean xs:string xs:integer xs:double xs:decimal xs:date" />
 														</xs:simpleType>
 													</xs:element>
+													<!-- validFrom and validTo is applicable to temporal events -->
+													<xs:element name="validFrom" type="xs:dateTime" minOccurs="0"/>
+													<xs:element name="validTo" type="xs:dateTime" minOccurs="0"/>
 												</xs:sequence>
-
 											</xs:complexType>
 										</xs:element>
 									</xs:sequence>

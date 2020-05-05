@@ -4,6 +4,7 @@ import org.xml.sax.SAXException;
 
 import com.temporal.persistence.DBTablePrinter;
 import com.temporal.query.CreateQuery;
+import com.temporal.query.InsertQuery;
 import com.temporal.query.SelectQuery;
 
 import javax.xml.bind.JAXBException;
@@ -11,6 +12,7 @@ import javax.xml.bind.UnmarshalException;
 
 import java.io.File;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.StringTokenizer;
 
 public class ModelApp {
@@ -88,8 +90,12 @@ public class ModelApp {
 //		}
 		
 		// Inserting input file
-		InputData data = InputData.loadFromXML(new File("Insert.xml"));
-		System.out.println();		
+		try {
+			InputData data = InputData.loadFromXML(new File("Insert.xml"));		
+			InsertQuery.insert(data.getTable());
+		}catch (SQLException e) {
+			
+		}		
 		
 		// Running normal select queries
 		try {
