@@ -1,14 +1,13 @@
 package com.temporal.query;
 
-import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.StringTokenizer;
 
-import com.temporal.persistence.GlobalConnection;
+import com.temporal.persistence.Excecutor;
+import com.temporal.persistence.GenericSqlBuilder;
 
 public class UpdateQuery {
 
@@ -52,8 +51,10 @@ public class UpdateQuery {
 	 */
 	public static boolean update(String query)
 	{	
-		String q[] = query.trim().split("update |set |where ");
+		Excecutor excecutor = new Excecutor();
+		Excecutor batchExcecutor = new Excecutor();
 		
+		String q[] = query.trim().split("update |set |where ");		
 		String table = q[1].trim();
 		String updateColumns = q[2].trim();
 		String keyCondition = q[3].trim();
@@ -74,85 +75,119 @@ public class UpdateQuery {
 		String keyValue = keyColumnValue[1].trim();
 				
 		try
-		{
-			Connection con = GlobalConnection.getConnection();
-			Statement statement = con.createStatement();			
-			
+		{						
 			StringBuilder soeQuery = new StringBuilder("update "+table+" set ");
 			
 			// Getting all events of this domain
-			ResultSet events = statement.executeQuery("select * from event_config where tableName = "+table);  
+			HashMap<String,Boolean> eventResolver = new HashMap<String, Boolean>();
+			boolean soeQueryPresent = false;
+			
+			excecutor.addSqlQuery(new GenericSqlBuilder("select * from event_config where domain_name = '"+table+"' and event_name != '"+keyColumn+"'"));
+			ResultSet events = excecutor.execute().get(0);
 			while(events.next())
+				eventResolver.put(events.getString("event_name"), events.getBoolean("temporal"));
+			
+			
+			for(Map.Entry<String, Boolean> curEvent: eventResolver.entrySet())
 			{
-				String event = events.getString("event");
+				String event = curEvent.getKey();
 				
-				// If temporal, then form the queries for corresponding temporal tables
-				if(events.getBoolean("temporal"))
+				if(updateValueMap.containsKey(event))
 				{
-					String moeTable = table + "_" + event;							
-					int lastRecordId = 0;
-					ResultSet lastRecord = statement.executeQuery("select id from "+moeTable + " where " + table+ "_"+ keyCondition +" order by valid_from desc limit 1");
-					while(lastRecord.next())
-						lastRecordId = lastRecord.getInt(1);
-					
-					// Case where some column was inserted as null initially, but later updated
-					if(lastRecordId!=0)
+					// If temporal, then form the queries for corresponding temporal tables
+					if(curEvent.getValue())
 					{
-						query = "update " + moeTable + " set valid_to = now() where " + table+ "_"+ keyCondition +" and id = " + lastRecordId;   								
-						statement.addBatch(query);		
-					}	
-					
-					query = "insert into " + moeTable + "(value,"+table+"_" + keyColumn+",valid_from,valid_to,transaction_enter) values(" +
-								updateValueMap.get(event) + ","+keyValue+",now(),\"9999-12-31 23:59:59\",current_timestamp())";
-					statement.addBatch(query);					
-					updateValueMap.remove(event);					
+						String moeTable = table + "_" + event;							
+						int lastRecordId = 0;
+						excecutor.clear();
+						excecutor.addSqlQuery(new GenericSqlBuilder("select id from "+moeTable + " where " + keyCondition +" order by valid_from desc limit 1"));
+						ResultSet lastRecord = excecutor.execute().get(0);
+						while(lastRecord.next())
+							lastRecordId = lastRecord.getInt(1);
+						
+						// If an old entry exists
+						if(lastRecordId!=0)
+						{
+							query = "update " + moeTable + " set valid_to = now() where " + keyCondition +" and id = " + lastRecordId;   
+							batchExcecutor.addSqlQuery(new GenericSqlBuilder(query));							
+							
+							query = "insert into " + moeTable + "(value," + keyColumn+",valid_from,valid_to,transaction_enter) values(" +
+									updateValueMap.get(event) + ","+keyValue+",now(),\"9999-12-31 23:59:59\",current_timestamp())";
+							batchExcecutor.addSqlQuery(new GenericSqlBuilder(query));
+						} // Two cases: either this value was inserted NULL initially or their doesn't have this entry in base table as well	
+						else
+						{
+							excecutor.clear();
+							excecutor.addSqlQuery(new GenericSqlBuilder("select * from "+ table +" where "+keyCondition));
+							ResultSet record = excecutor.execute().get(0);
+							if(record.getFetchSize()!=0)							
+							{
+								query = "insert into " + moeTable + "(value," + keyColumn+",valid_from,valid_to,transaction_enter) values(" +
+										updateValueMap.get(event) + ","+keyValue+",now(),\"9999-12-31 23:59:59\",current_timestamp())";
+								batchExcecutor.addSqlQuery(new GenericSqlBuilder(query));
+							}
+						}
+											
+						updateValueMap.remove(event);					
+					}
+					else
+					{
+						soeQuery.append(event + " = " + updateValueMap.get(event) + ",");
+						soeQueryPresent = true;
+					}		
 				}
-				else
-				{
-					soeQuery.append(event + " = " + updateValueMap.get(event) + ",");
-				}				
 			}
 			
 			// Completing SOE Query
-			soeQuery.deleteCharAt(soeQuery.length()-1);
-			soeQuery.append(" where " + keyCondition);
-			statement.addBatch(soeQuery.toString());
+			if(soeQueryPresent)
+			{
+				soeQuery.deleteCharAt(soeQuery.length()-1);
+				soeQuery.append(" where " + keyCondition);
+				batchExcecutor.addSqlQuery(new GenericSqlBuilder(soeQuery.toString()));				
+			}
 			
 			// Completing MOE Queries for remaining foreign key attributes in this table			
 			for(Map.Entry<String, String> foreignKeyEvent : updateValueMap.entrySet())
 			{ 
-				String moeTable = table + "_" + foreignKeyEvent.getKey();
+				String fkTableField[] = foreignKeyEvent.getKey().trim().split("_");
+				String moeTable = table + "_" + fkTableField[1];
 				int lastRecordId = 0;
-				ResultSet lastRecord = statement.executeQuery("select id from "+moeTable + " where " + table+ "_"+ keyCondition +" order by valid_from desc limit 1");
+				
+				excecutor.clear();
+				excecutor.addSqlQuery(new GenericSqlBuilder("select id from "+moeTable + " where " + keyCondition +" order by valid_from desc limit 1"));
+				ResultSet lastRecord = excecutor.execute().get(0);
 				while(lastRecord.next())
 					lastRecordId = lastRecord.getInt(1);
 				
 				if(lastRecordId!=0)
 				{
-					query = "update " + moeTable + " set valid_to = now() where " + table+ "_"+ keyCondition +" and id = " + lastRecordId;   								
-					statement.addBatch(query);		
-				}	
-				
-				query = "insert into " + moeTable + "(value,"+table+"_" + keyColumn+",valid_from,valid_to,transaction_enter) values(" +
+					query = "update " + moeTable + " set valid_to = now() where " + keyCondition +" and id = " + lastRecordId;   								
+					batchExcecutor.addSqlQuery(new GenericSqlBuilder(query));
+					
+					query = "insert into " + moeTable + "("+fkTableField[1]+","+ keyColumn+",valid_from,valid_to,transaction_enter) values(" +
 							foreignKeyEvent.getValue() + ","+keyValue+",now(),\"9999-12-31 23:59:59\",current_timestamp())";
-				statement.addBatch(query);									
+					batchExcecutor.addSqlQuery(new GenericSqlBuilder(query));
+				}	
+				else
+				{
+					excecutor.clear();
+					excecutor.addSqlQuery(new GenericSqlBuilder("select * from "+ table +" where "+keyCondition));
+					ResultSet record = excecutor.execute().get(0);
+					if(record.next())							
+					{
+						query = "insert into " + moeTable + "("+fkTableField[1]+","+ keyColumn+",valid_from,valid_to,transaction_enter) values(" +
+								foreignKeyEvent.getValue() + ","+keyValue+",now(),\"9999-12-31 23:59:59\",current_timestamp())";
+						batchExcecutor.addSqlQuery(new GenericSqlBuilder(query));
+					}
+				}				
 			}
 			
 			// Batch execute 
-			int count[] = statement.executeBatch();
-			for(int i=0;i<count.length;i++)
-			{
-				if(count[i]<0)
-				{
-					con.rollback();
-					con.close();
-					return false;
-				}
-			}
-			con.close();
+			batchExcecutor.execute();			
+			return true;
 		}catch (SQLException e) {
 			e.printStackTrace();
-		}		
-		return true;
+			return false;
+		}				
 	}
 }

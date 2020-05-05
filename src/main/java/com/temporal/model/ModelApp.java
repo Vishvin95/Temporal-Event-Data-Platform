@@ -6,6 +6,7 @@ import com.temporal.persistence.DBTablePrinter;
 import com.temporal.query.CreateQuery;
 import com.temporal.query.InsertQuery;
 import com.temporal.query.SelectQuery;
+import com.temporal.query.UpdateQuery;
 
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.UnmarshalException;
@@ -93,8 +94,9 @@ public class ModelApp {
 		try {
 			InputData data = InputData.loadFromXML(new File("Insert.xml"));		
 			InsertQuery.insert(data.getTable());
+						
 		}catch (SQLException e) {
-			
+			e.printStackTrace();
 		}		
 		
 		// Running normal select queries
@@ -110,5 +112,8 @@ public class ModelApp {
 		}catch (Exception e) {
 			e.printStackTrace();
 		}
+		
+		boolean res = UpdateQuery.update("update boiler set pump_pumpCode = 'P1' where boilerCode = 'B1'");
+		System.out.println(res);
 	}
 }

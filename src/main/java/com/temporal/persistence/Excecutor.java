@@ -49,4 +49,9 @@ public class Excecutor {
         }
         return resultSets;
     }
+    
+    public void clear()
+    {
+    	statements.clear();
+    }
 }
