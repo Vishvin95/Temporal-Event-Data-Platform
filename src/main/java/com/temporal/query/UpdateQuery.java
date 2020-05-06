@@ -2,6 +2,7 @@ package com.temporal.query;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.SQLSyntaxErrorException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.StringTokenizer;
@@ -48,34 +49,35 @@ public class UpdateQuery {
  	 *  
 	 * @param query : SQL query
 	 * @return status : success
+	 * @throws SQLSyntaxErrorException 
 	 */
-	public static boolean update(String query)
+	public static boolean update(String query) throws SQLSyntaxErrorException
 	{	
-		Excecutor excecutor = new Excecutor();
-		Excecutor batchExcecutor = new Excecutor();
-		
-		String q[] = query.trim().split("update |set |where ");		
-		String table = q[1].trim();
-		String updateColumns = q[2].trim();
-		String keyCondition = q[3].trim();
-				
-		// Loading values to be updated
-		HashMap<String,String> updateValueMap = new HashMap<>();
-		StringTokenizer st = new StringTokenizer(updateColumns, ",");
-		while(st.hasMoreTokens())
-		{
-			String pair = st.nextToken();
-			String pairSplit[] = pair.trim().split("=");
-			updateValueMap.put(pairSplit[0].trim(), pairSplit[1].trim());
-		}
-		
-		// Getting key column and value
-		String keyColumnValue[] = keyCondition.trim().split("=");
-		String keyColumn = keyColumnValue[0].trim();
-		String keyValue = keyColumnValue[1].trim();
-				
 		try
-		{						
+		{				
+			Excecutor excecutor = new Excecutor();
+			Excecutor batchExcecutor = new Excecutor();
+					
+			String q[] = query.trim().split("update |set |where ");		
+			String table = q[1].trim();
+			String updateColumns = q[2].trim();
+			String keyCondition = q[3].trim();
+					
+			// Loading values to be updated
+			HashMap<String,String> updateValueMap = new HashMap<>();
+			StringTokenizer st = new StringTokenizer(updateColumns, ",");
+			while(st.hasMoreTokens())
+			{
+				String pair = st.nextToken();
+				String pairSplit[] = pair.trim().split("=");
+				updateValueMap.put(pairSplit[0].trim(), pairSplit[1].trim());
+			}
+			
+			// Getting key column and value
+			String keyColumnValue[] = keyCondition.trim().split("=");
+			String keyColumn = keyColumnValue[0].trim();
+			String keyValue = keyColumnValue[1].trim();
+											
 			StringBuilder soeQuery = new StringBuilder("update "+table+" set ");
 			
 			// Getting all events of this domain
@@ -120,7 +122,7 @@ public class UpdateQuery {
 							excecutor.clear();
 							excecutor.addSqlQuery(new GenericSqlBuilder("select * from "+ table +" where "+keyCondition));
 							ResultSet record = excecutor.execute().get(0);
-							if(record.getFetchSize()!=0)							
+							if(record.next())							
 							{
 								query = "insert into " + moeTable + "(value," + keyColumn+",valid_from,valid_to,transaction_enter) values(" +
 										updateValueMap.get(event) + ","+keyValue+",now(),\"9999-12-31 23:59:59\",current_timestamp())";
@@ -136,15 +138,7 @@ public class UpdateQuery {
 						soeQueryPresent = true;
 					}		
 				}
-			}
-			
-			// Completing SOE Query
-			if(soeQueryPresent)
-			{
-				soeQuery.deleteCharAt(soeQuery.length()-1);
-				soeQuery.append(" where " + keyCondition);
-				batchExcecutor.addSqlQuery(new GenericSqlBuilder(soeQuery.toString()));				
-			}
+			}					
 			
 			// Completing MOE Queries for remaining foreign key attributes in this table			
 			for(Map.Entry<String, String> foreignKeyEvent : updateValueMap.entrySet())
@@ -180,12 +174,25 @@ public class UpdateQuery {
 						batchExcecutor.addSqlQuery(new GenericSqlBuilder(query));
 					}
 				}				
+				
+				soeQuery.append(foreignKeyEvent.getKey() + " = " + foreignKeyEvent.getValue() + ",");
+				soeQueryPresent = true;
+			}
+			
+			if(soeQueryPresent)
+			{
+				soeQuery.deleteCharAt(soeQuery.length()-1);
+				soeQuery.append(" where " + keyCondition);
+				batchExcecutor.addSqlQuery(new GenericSqlBuilder(soeQuery.toString()));
 			}
 			
 			// Batch execute 
 			batchExcecutor.execute();			
 			return true;
-		}catch (SQLException e) {
+		}catch(IndexOutOfBoundsException e) {
+			throw new SQLSyntaxErrorException(query);			
+		}		
+		catch(SQLException e) {
 			e.printStackTrace();
 			return false;
 		}				
