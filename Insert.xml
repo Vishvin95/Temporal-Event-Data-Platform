@@ -12,12 +12,12 @@
 			</column>
 			<column>
 				<key>temperature</key>
-				<value>10</value>
+				<value>100</value>
 				<validFrom>2020-05-01T23:00:00</validFrom>
 			</column>
 			<column>
 				<key>pressure</key>
-				<value>31</value>
+				<value>35</value>
 				<validFrom>2020-05-01T09:00:00</validFrom>
 				<validTo>2020-05-11T03:00:00</validTo>
 			</column>

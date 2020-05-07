@@ -2,40 +2,135 @@ package com.temporal.query;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.SQLIntegrityConstraintViolationException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.StringTokenizer;
 
+import com.temporal.model.Column;
+import com.temporal.model.Table;
 import com.temporal.persistence.Excecutor;
 import com.temporal.persistence.GenericSqlBuilder;
+import javafx.util.Pair;
 
-public class UpdateQuery {
+public class UpdateQuery extends InsertQuery {
 
-	public static void update() {
-//        ArrayList<Column> columns=table.getRawReadings();
-//        for(Column column:columns)
-//        {
-//            if(PrimaryKey_Resolver.get(table.getName()).getKey().compareTo(column.getKey())==0)
-//            {
-//                Excecutor excecutor = new Excecutor();
-//                String sql="select * from "+table.getName()+" where "+column.getKey()+"=";
-//                if(PrimaryKey_Resolver.get(table.getName()).getValue().compareTo("string")==0)
-//                    sql=sql+'"'+column.getValue()+'"'+";";
-//                else
-//                    sql=sql+column.getValue()+";";
-//                excecutor.addSqlQuery(new GenericSqlBuilder(sql));
-//                List<ResultSet> resultSets = excecutor.execute();
-//
-//                if(resultSets.isEmpty())
-//                {
-//
-//                }
-//                else
-//                {
-//
-//                }
-//            }
-//        }
+	public static String GetResultSet(String sql) throws SQLException{
+		if(sql.compareTo("")!=0)
+		{
+			String queries[]=sql.split(";");
+			Excecutor excecutor=new Excecutor();
+			for(String query:queries)
+			{
+				excecutor.addSqlQuery(new GenericSqlBuilder(query+";"));
+			}
+			ArrayList<ResultSet> rs = (ArrayList<ResultSet>) excecutor.execute();
+			return rs.get(0).toString();
+		}
+		return null;
+	}
+
+	public static String GetValue(String table,String pk,String pkvalue,String fk) throws SQLException{
+		String sql="select "+fk+" from "+table+" where "+pk+"="+pkvalue+";";
+		Excecutor excecutor=new Excecutor();
+		excecutor.addSqlQuery(new GenericSqlBuilder(sql));
+		ArrayList<ResultSet> rs = (ArrayList<ResultSet>) excecutor.execute();
+		return rs.get(0).toString();
+	}
+
+	public static void update(Table table) throws SQLException  {
+
+		ArrayList<Column> columns=table.getRawReadings();
+		HashMap<String,String> key_resolver=keyResolver();
+		HashMap<String, Pair<String,String>> temporal_resolver=temporalResolver();
+
+		String HistoryUpdate="";
+		String TemporalUpdate="";
+		String pk="";
+		String pkValue="";
+		String temp="update "+table.getName()+" set ";
+		StringBuilder MainUpdate=new StringBuilder(temp);
+		StringBuilder MainUpdateHelper=new StringBuilder();
+
+
+
+		for(Column column:columns)
+		{
+			if(key_resolver.get(column.getKey())!=null&&key_resolver.get(column.getKey()).compareTo(table.getName())==0)
+			{
+				pk=column.getKey();
+				pkValue=column.getValue();
+				break;
+			}
+		}
+
+		String Check="select * from "+table.getName()+" where "+pk+" ="+valueMaker(pk,pkValue,temporal_resolver)+";";
+
+		if(!GetResultSet(Check).isEmpty())
+		{
+			for (Column column:columns)
+			{
+				if(Integer.parseInt(temporal_resolver.get(column.getKey()).getValue())==1)
+				{
+					TemporalUpdate=TemporalUpdate+"insert into "+table.getName()+"_"+column.getKey()+"("
+							+pk+",value,valid_from,valid_to,transaction_enter) values("+valueMaker(pk,pkValue,temporal_resolver)+","+
+							valueMaker(column.getKey(),column.getValue(),temporal_resolver)+","+getValidFromTimestamp(column.getValidFrom())+
+							","+getValidToTimestamp(column.getValidTo())+",now()"+");";
+				}
+			}
+			for(Column column:columns)
+			{
+				if(Integer.parseInt(temporal_resolver.get(column.getKey()).getValue())==0&&column.getKey().compareTo(pk)!=0)
+				{
+					MainUpdateHelper=MainUpdateHelper.append(column.getKey()+"="+column.getValue()+",");
+					if(key_resolver.containsKey(column.getKey()))
+					{
+                        if(GetValue(table.getName(),pk,valueMaker(pk,pkValue,temporal_resolver),column.getKey()).compareTo(column.getValue())!=0)
+						{
+							HistoryUpdate=HistoryUpdate+"insert into "+table.getName()+"_"+column.getKey()+"("+pk+","+column.getKey()+
+									",valid_from,valid_to,transaction_enter) "+"values("+
+									valueMaker(pk,pkValue,temporal_resolver)+","+valueMaker(column.getKey(),column.getValue(),temporal_resolver)+","+
+									getValidFromTimestamp(column.getValidFrom())+","+getValidToTimestamp(column.getValidTo())+",now()"+
+									");";
+						}
+
+					}
+				}
+			}
+            MainUpdate=MainUpdate.append(MainUpdateHelper);
+			MainUpdate=MainUpdate.deleteCharAt(MainUpdate.length()-1);
+			temp = " where "+pk+"="+valueMaker(pk,pkValue,temporal_resolver)+";";
+			MainUpdate.append(temp);
+
+			System.out.println(MainUpdate);
+			System.out.println(TemporalUpdate);
+			System.out.println(HistoryUpdate);
+
+			boolean success=true;
+			try
+			{
+				queryExecution(HistoryUpdate);
+			}
+			catch (SQLException e)
+			{
+				success=false;
+				System.out.println(e);
+			}
+			if(success==true)
+			{
+				if(!MainUpdateHelper.toString().isEmpty())
+					queryExecution(MainUpdate.toString());
+				queryExecution(TemporalUpdate);
+			}
+		}
+
+        else
+		{
+			System.out.println("the primary key does not exists");
+		}
+
+
 	}
 
 	/**

@@ -25,15 +25,15 @@ public class Test {
 //        System.out.println(s);
 //        Excecutor excecutor = new Excecutor();
 //        excecutor.addSqlQuery(new GenericSqlBuilder("select * from boiler"));
-//        List<ResultSzet> abc = excecutor.execute();
+//        List<ResultSet> abc = excecutor.execute();
 //        for(ResultSet r:abc)
 //        {
 //            DBTablePrinter.printResultSet(r);
 //        }
         File file1 = new File("Insert.xml");
         InputData rawdata = InputData.loadFromXML(file1);
-        InsertQuery.insert(rawdata.getTable());
-
+        //InsertQuery.insert(rawdata.getTable());
+        UpdateQuery.update(rawdata.getTable());
 
     }
 }
