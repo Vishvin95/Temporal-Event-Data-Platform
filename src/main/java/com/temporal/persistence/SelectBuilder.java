@@ -176,7 +176,7 @@ public class SelectBuilder extends AbstractSqlBuilder {
 
         appendData(sqlBuilder,tables," FROM ",", ");
         appendData(sqlBuilder,joins," JOIN "," JOIN ");
-        appendData(sqlBuilder,leftJoins," LEFT JOIN"," LEFT JOIN ");
+        appendData(sqlBuilder,leftJoins," LEFT JOIN "," LEFT JOIN ");
         appendData(sqlBuilder,wheres," WHERE "," AND ");
         appendData(sqlBuilder,groupBys," GROUP BY ",", ");
         appendData(sqlBuilder,havings," HAVING "," AND ");

@@ -108,12 +108,11 @@ public class ModelApp {
 															+ "inner join supervisor on boiler.supId = supervisor.supId");					
 			DBTablePrinter.printResultSet(selectWithJoin);
 			
+			boolean res = UpdateQuery.update("update boiler set temperature = 25, pressure = 46 where boilerCode = 'B2'");
+			System.out.println(res);
 			
 		}catch (Exception e) {
 			e.printStackTrace();
-		}
-		
-		boolean res = UpdateQuery.update("update boiler set pump_pumpCode = 'P1' where boilerCode = 'B1'");
-		System.out.println(res);
+		}		
 	}
 }

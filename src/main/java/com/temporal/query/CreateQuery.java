@@ -185,11 +185,12 @@ public class CreateQuery {
                     else
                         EventConfigQuery=EventConfigQuery+"true,false);";
                     
-                    select.column(domain.getName()+"_"+event.getName() + ".value as " + event.getName());
-                    select.join(domain.getName()+"_"+event.getName() + " on " + domain.getName()+"."+PrimaryKey_Resolver.get(domain.getName()).getKey() 
+                    select.column(domain.getName()+"_"+event.getName() + ".value as " + event.getName());                    
+                    select.leftJoin(domain.getName()+"_"+event.getName() + " on " + domain.getName()+"."+PrimaryKey_Resolver.get(domain.getName()).getKey() 
                     				+ " = " + domain.getName()+"_"+event.getName() + "." + PrimaryKey_Resolver.get(domain.getName()).getKey());
-                    select.where(domain.getName()+"_"+event.getName()+".valid_from <= now()");
-                    select.where("now() < " + domain.getName()+"_"+event.getName()+".valid_to");
+                    select.where("(" + domain.getName()+"_"+event.getName()+".valid_from <= now() and now() < "
+                    				+ domain.getName()+"_"+event.getName()+".valid_to or " 
+                    		        + domain.getName()+"_"+event.getName()+"." + PrimaryKey_Resolver.get(domain.getName()).getKey() +" is null)");                                        
                 }
                 else
                 {
@@ -237,10 +238,11 @@ public class CreateQuery {
                                  ",valid_from datetime,valid_to datetime,transaction_enter datetime,transaction_delete datetime);";
                     
                     views.get(domain.getName())
-                    		.column(domain.getName()+"."+foreignKey+"_"+PrimaryKey_Resolver.get(foreignKey).getKey() + " as "+ PrimaryKey_Resolver.get(foreignKey).getKey())
-                    		.where(domain.getName()+"_"+PrimaryKey_Resolver.get(foreignKey).getKey()+".valid_from <= now()")
-                    		.where("now() < "+domain.getName()+"_"+PrimaryKey_Resolver.get(foreignKey).getKey()+".valid_to")
-                    		.join(domain.getName()+"_"+PrimaryKey_Resolver.get(foreignKey).getKey()+" on " + domain.getName()+"."+ 
+                    		.column(domain.getName()+"_"+PrimaryKey_Resolver.get(foreignKey).getKey() + "." + PrimaryKey_Resolver.get(foreignKey).getKey() + " as "+ PrimaryKey_Resolver.get(foreignKey).getKey())
+                    		.where("("+domain.getName()+"_"+PrimaryKey_Resolver.get(foreignKey).getKey()+".valid_from <= now() and now() < "
+                    				+domain.getName()+"_"+PrimaryKey_Resolver.get(foreignKey).getKey()+".valid_to or " + domain.getName()+"_"+PrimaryKey_Resolver.get(foreignKey).getKey()
+                    				+"."+PrimaryKey_Resolver.get(domain.getName()).getKey() + " is null)")                    		
+                    		.leftJoin(domain.getName()+"_"+PrimaryKey_Resolver.get(foreignKey).getKey()+" on " + domain.getName()+"."+ 
                     				PrimaryKey_Resolver.get(domain.getName()).getKey() + 
                     				" = " + domain.getName()+"_"+PrimaryKey_Resolver.get(foreignKey).getKey()+"." + PrimaryKey_Resolver.get(domain.getName()).getKey());                    		
                     				
@@ -264,10 +266,11 @@ public class CreateQuery {
                             ",valid_from datetime,valid_to datetime,transaction_enter datetime,transaction_delete datetime);";
                     
                     views.get(domain.getName())
-            		.column(domain.getName()+"."+foreignKey+"_"+PrimaryKey_Resolver.get(foreignKey).getKey() + " as "+ PrimaryKey_Resolver.get(foreignKey).getKey())
-            		.where(domain.getName()+"_"+PrimaryKey_Resolver.get(foreignKey).getKey()+".valid_from <= now()")
-            		.where("now() < "+domain.getName()+"_"+PrimaryKey_Resolver.get(foreignKey).getKey()+".valid_to")
-            		.join(domain.getName()+"_"+PrimaryKey_Resolver.get(foreignKey).getKey()+" on " + domain.getName()+"."+ 
+                    .column(domain.getName()+"_"+PrimaryKey_Resolver.get(foreignKey).getKey() + "." + PrimaryKey_Resolver.get(foreignKey).getKey() + " as "+ PrimaryKey_Resolver.get(foreignKey).getKey())
+                    .where("("+domain.getName()+"_"+PrimaryKey_Resolver.get(foreignKey).getKey()+".valid_from <= now() and now() < "
+            				+domain.getName()+"_"+PrimaryKey_Resolver.get(foreignKey).getKey()+".valid_to or " + domain.getName()+"_"+PrimaryKey_Resolver.get(foreignKey).getKey()
+            				+"."+PrimaryKey_Resolver.get(domain.getName()).getKey() + " is null)")   
+            		.leftJoin(domain.getName()+"_"+PrimaryKey_Resolver.get(foreignKey).getKey()+" on " + domain.getName()+"."+ 
             				PrimaryKey_Resolver.get(domain.getName()).getKey() +
             				" = " + domain.getName()+"_"+PrimaryKey_Resolver.get(foreignKey).getKey()+"." + PrimaryKey_Resolver.get(domain.getName()).getKey()); 
 
