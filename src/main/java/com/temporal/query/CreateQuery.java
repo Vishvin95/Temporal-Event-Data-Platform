@@ -227,10 +227,10 @@ public class CreateQuery {
                 ArrayList<String> foreignKeys=Relationships_1x1.get(domain.getName());
                 for(String foreignKey:foreignKeys)
                 {
-                    query=query+"alter table "+domain.getName()+" add "+foreignKey+"_"+PrimaryKey_Resolver.get(foreignKey).getKey()+
+                    query=query+"alter table "+domain.getName()+" add "+PrimaryKey_Resolver.get(foreignKey).getKey()+
                             " "+dataType_Resolver.get(PrimaryKey_Resolver.get(foreignKey).getValue())+";";
                     query=query+"alter table "+domain.getName()+" add constraint foreign key("+
-                            foreignKey+"_"+PrimaryKey_Resolver.get(foreignKey).getKey()+") references "+foreignKey+"("+PrimaryKey_Resolver.get(foreignKey).getKey()+");";
+                            PrimaryKey_Resolver.get(foreignKey).getKey()+") references "+foreignKey+"("+PrimaryKey_Resolver.get(foreignKey).getKey()+");";
 
                     query=query+"create table "+domain.getName()+"_"+PrimaryKey_Resolver.get(foreignKey).getKey()+"("+"id int not null unique auto_increment,"+
                                 PrimaryKey_Resolver.get(foreignKey).getKey()+" "+dataType_Resolver.get(PrimaryKey_Resolver.get(foreignKey).getValue())+
@@ -254,10 +254,10 @@ public class CreateQuery {
                 ArrayList<String> foreignKeys=Relationships_Nx1.get(domain.getName());
                 for(String foreignKey:foreignKeys)
                 {
-                    query=query+"alter table "+domain.getName()+" add "+foreignKey+"_"+PrimaryKey_Resolver.get(foreignKey).getKey()+
+                    query=query+"alter table "+domain.getName()+" add "+PrimaryKey_Resolver.get(foreignKey).getKey()+
                             " "+dataType_Resolver.get(PrimaryKey_Resolver.get(foreignKey).getValue())+";";
                     query=query+"alter table "+domain.getName()+" add constraint foreign key("+
-                            foreignKey+"_"+PrimaryKey_Resolver.get(foreignKey).getKey()+") references "+foreignKey+"("+PrimaryKey_Resolver.get(foreignKey).getKey()+");";
+                            PrimaryKey_Resolver.get(foreignKey).getKey()+") references "+foreignKey+"("+PrimaryKey_Resolver.get(foreignKey).getKey()+");";
 
                     query=query+"create table "+domain.getName()+"_"+PrimaryKey_Resolver.get(foreignKey).getKey()+"("+"id int not null unique auto_increment,"+
 

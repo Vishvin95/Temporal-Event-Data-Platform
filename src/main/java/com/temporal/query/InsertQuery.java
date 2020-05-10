@@ -74,7 +74,7 @@ public class InsertQuery  {
 
     public static String getValidFromTimestamp(Date date)
     {
-        return date == null ? '"'+"now()"+'"' : '"'+new Timestamp(date.getTime()).toString()+'"';
+        return date == null ? "now()" : '"'+new Timestamp(date.getTime()).toString()+'"';
     }
 
     public static String getValidToTimestamp(Date date)
@@ -136,6 +136,7 @@ public class InsertQuery  {
         MainInsert=MainInsert+")"+MainInsertHelper+");";
         System.out.println(MainInsert);
         System.out.println(TemporalInsert);
+        System.out.println(HistoryInsert);
         boolean success=true;
         try
         {
