@@ -20,8 +20,9 @@ public class Excecutor {
         this.statements = new ArrayDeque<>();
 
     }
-    public void addSqlQuery(AbstractSqlBuilder sqlBuilder){
+    public Excecutor addSqlQuery(AbstractSqlBuilder sqlBuilder){
         this.statements.addLast(sqlBuilder);
+        return this;
     }
 
     public List<ResultSet> execute() throws SQLException {
@@ -35,6 +36,7 @@ public class Excecutor {
                         ||query[0].toLowerCase().equals("alter")
                         ||query[0].toLowerCase().equals("use")
                         ||query[0].toLowerCase().equals("insert")
+                        ||query[0].toLowerCase().equals("drop")
                 )
                 statement.executeUpdate(abstractSqlBuilder.toString());
                 else{

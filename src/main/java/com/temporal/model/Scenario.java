@@ -22,11 +22,11 @@ public class Scenario {
 	private ArrayList<Domain> domains;
 	private ArrayList<Relationship> relationships;	
 
-	public Scenario() {
+	Scenario() {
 
 	}
 
-	private Scenario(ScenarioBuilder scenarioBuilder) {
+	public Scenario(ScenarioBuilder scenarioBuilder) {
 		this.domains = scenarioBuilder.domains;
 		this.relationships = scenarioBuilder.relationships;
 	}

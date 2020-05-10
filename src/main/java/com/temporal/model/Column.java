@@ -48,4 +48,14 @@ public class Column {
 	public void setValidTo(Date validTo) {
 		this.validTo = validTo;
 	}
+
+	@Override
+	public String toString() {
+		return "Column{" +
+				"key='" + key + '\'' +
+				", value='" + value + '\'' +
+				", validFrom=" + validFrom +
+				", validTo=" + validTo +
+				'}';
+	}
 }

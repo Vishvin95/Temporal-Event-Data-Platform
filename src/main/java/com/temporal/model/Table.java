@@ -27,4 +27,12 @@ public class Table {
 	public void setRawReadings(ArrayList<Column> columns) {
 		this.columns = columns;
 	}
+
+	@Override
+	public String toString() {
+		return "Table{" +
+				"name='" + name + '\'' +
+				", columns=" + columns +
+				'}';
+	}
 }
