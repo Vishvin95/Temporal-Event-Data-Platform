@@ -472,7 +472,7 @@ public class DBTablePrinter {
                     }
 
                     // Adjust the column width
-                    c.setWidth(value.length() > c.getWidth() ? value.length() : c.getWidth());
+                    c.setWidth(Math.max(value.length(), c.getWidth()));
                     c.addValue(value);
                 } // END of for loop columnCount
                 rowCount++;

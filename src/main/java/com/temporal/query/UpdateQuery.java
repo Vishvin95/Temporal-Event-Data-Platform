@@ -2,12 +2,8 @@ package com.temporal.query;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-<<<<<<< HEAD
-import java.sql.SQLIntegrityConstraintViolationException;
 import java.util.ArrayList;
-=======
 import java.sql.SQLSyntaxErrorException;
->>>>>>> f8ebe18440d90ea0424c33b8f82e5ea003baca32
 import java.util.HashMap;
 import java.util.Map;
 import java.util.StringTokenizer;

@@ -10,7 +10,7 @@ package com.temporal.persistence;
     
 */
 
-public class UseBuilder {
+public class UseBuilder extends AbstractSqlBuilder{
     String database;
 
     public UseBuilder(String database){
