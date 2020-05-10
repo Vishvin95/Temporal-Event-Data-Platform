@@ -88,7 +88,7 @@ public class UpdateQuery extends InsertQuery {
 			{
 				if(Integer.parseInt(temporal_resolver.get(column.getKey()).getValue())==0&&column.getKey().compareTo(pk)!=0)
 				{
-					MainUpdateHelper=MainUpdateHelper.append(column.getKey()+"="+column.getValue()+",");
+					MainUpdateHelper=MainUpdateHelper.append(column.getKey()+"="+valueMaker(column.getKey(),column.getValue(),temporal_resolver)+",");
 					if(key_resolver.containsKey(column.getKey()))
 					{
                         if(GetValue(table.getName(),pk,valueMaker(pk,pkValue,temporal_resolver),column.getKey()).compareTo(column.getValue())!=0)

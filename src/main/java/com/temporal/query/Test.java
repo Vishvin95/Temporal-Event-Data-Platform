@@ -32,8 +32,8 @@ public class Test {
 //        }
         File file1 = new File("Insert.xml");
         InputData rawdata = InputData.loadFromXML(file1);
-        InsertQuery.insert(rawdata.getTable());
-        //UpdateQuery.update(rawdata.getTable());
+        //InsertQuery.insert(rawdata.getTable());
+        UpdateQuery.update(rawdata.getTable());
 
     }
 }
