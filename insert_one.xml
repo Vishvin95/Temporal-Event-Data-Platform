@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<inputData>
+    <table name="supervisor">
+        <row>
+            <column>
+                <key>supId</key>
+                <value>S0</value>
+            </column>
+            <column>
+                <key>name</key>
+                <value>qnoboeexfp</value>
+            </column>
+            <column>
+                <key>age</key>
+                <value>337</value>
+            </column>
+            <column>
+                <key>salary</key>
+                <validFrom>01-01-2020 11:15:20</validFrom>
+                <validTo>01-01-2020 11:41:23</validTo>
+                <value>317.0</value>
+            </column>
+        </row>
+    </table>
+</inputData>

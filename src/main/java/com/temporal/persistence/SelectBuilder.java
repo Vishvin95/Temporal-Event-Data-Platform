@@ -9,7 +9,7 @@ public class SelectBuilder extends AbstractSqlBuilder {
 
     private List<Object> tables = new ArrayList<>();
 
-    private List<String> joins = new ArrayList<>();
+    private List<Object> joins = new ArrayList<>();
 
     private List<String> leftJoins = new ArrayList<>();
 
@@ -51,8 +51,16 @@ public class SelectBuilder extends AbstractSqlBuilder {
             }
         }
 
+        for(Object table : selectBuilder.joins){
+            if(table instanceof SubSelectBuilder){
+                this.joins.add(((SubSelectBuilder) table).clone());
+            }else{
+                this.joins.add(table);
+            }
+        }
+
         //this.tables.addAll(selectBuilder.tables);
-        this.joins.addAll(selectBuilder.joins);
+        //this.joins.addAll(selectBuilder.joins);
         this.leftJoins.addAll(selectBuilder.leftJoins);
         this.wheres.addAll(selectBuilder.wheres);
         this.groupBys.addAll(selectBuilder.groupBys);
@@ -120,6 +128,8 @@ public class SelectBuilder extends AbstractSqlBuilder {
         return this;
     }
 
+
+
     public List<SelectBuilder> getUnions() {return unions;}
 
     public SelectBuilder groupBy(String expr){
@@ -134,6 +144,11 @@ public class SelectBuilder extends AbstractSqlBuilder {
 
     public SelectBuilder join(String join){
         joins.add(join);
+        return this;
+    }
+
+    public SelectBuilder join(SubSelectBuilder subSelectBuilder){
+        joins.add(subSelectBuilder);
         return this;
     }
 

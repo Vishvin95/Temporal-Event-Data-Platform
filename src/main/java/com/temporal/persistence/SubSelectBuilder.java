@@ -9,7 +9,7 @@ public class SubSelectBuilder extends SelectBuilder {
         this.alias = alias;
     }
 
-    protected SubSelectBuilder(SubSelectBuilder subSelectBuilder){
+    public SubSelectBuilder(SubSelectBuilder subSelectBuilder){
         super(subSelectBuilder);
         this.alias = subSelectBuilder.alias;
     }

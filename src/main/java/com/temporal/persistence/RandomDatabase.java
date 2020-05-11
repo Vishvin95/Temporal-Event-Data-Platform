@@ -31,12 +31,12 @@ import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
 
 public class RandomDatabase {
-    private static final int PRIMARY_KEY_BOILER = 1;
-    private static final int TEMPORAL_VARIATION_BOILER = 1;
-    private static final int PRIMARY_KEY_PUMP = 1;
-    private static final int TEMPORAL_VARIATION_PUMP = 1;
-    private static final int PRIMARY_KEY_SUPERVISOR = 1;
-    private static final int TEMPORAL_VARIATION_SUPERVISOR = 1;
+    private static final int PRIMARY_KEY_BOILER = 10;
+    private static final int TEMPORAL_VARIATION_BOILER = 50;
+    private static final int PRIMARY_KEY_PUMP = 10;
+    private static final int TEMPORAL_VARIATION_PUMP = 50;
+    private static final int PRIMARY_KEY_SUPERVISOR = 10;
+    private static final int TEMPORAL_VARIATION_SUPERVISOR = 50;
     private static Float randomFloat(){
         return ThreadLocalRandom.current().nextFloat() * 100 + 1;
     }
@@ -243,11 +243,11 @@ public class RandomDatabase {
             column.setValue(current_key);
             def_column.add(column);
             column = new Column();
-            column.setKey("pump_pumpCode");
+            column.setKey("pumpCode");
             column.setValue(randomString(pump_id));
             def_column.add(column);
             column = new Column();
-            column.setKey("supervisor_supId");
+            column.setKey("supId");
             column.setValue(randomString(sup_id));
             def_column.add(column);
             tables[i] = random_boiler(for_each_primary_key,def_column);
@@ -275,15 +275,16 @@ public class RandomDatabase {
         ArrayList<String> sup_primary_key = new ArrayList<>(sup_unique);
         Table[][] boiler = random_boiler(PRIMARY_KEY_BOILER,TEMPORAL_VARIATION_BOILER,pump_primary_key,sup_primary_key);
         ArrayList<ArrayList<ArrayList<Table>>> send = new ArrayList<>();
-        send.add(convert(boiler));
         send.add(convert(pump));
         send.add(convert(supervisor));
+        send.add(convert(boiler));
         return send;
     }
     public static void applyDatabase(ArrayList<ArrayList<ArrayList<Table>>> randomDatabase) throws SQLException {
         for (ArrayList<ArrayList<Table>> arrayLists : randomDatabase) {
             for (ArrayList<Table> tables : arrayLists) {
                 for (int i = 0, h = tables.size(); i < h; i++) {
+                    System.out.println(tables.get(i));
                     if (i == 0) {
                         InsertQuery.insert(tables.get(i));
                     }else{

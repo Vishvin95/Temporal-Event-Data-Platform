@@ -14,6 +14,7 @@ package com.temporal.persistence;
 import com.temporal.model.*;
 import com.temporal.query.CreateQuery;
 import com.temporal.query.InsertQuery;
+import com.temporal.query.TemporalQuery;
 import com.temporal.query.UpdateQuery;
 import jdk.nashorn.internal.runtime.regexp.joni.CodeRangeBuffer;
 import org.apache.logging.log4j.LogManager;
@@ -24,10 +25,14 @@ import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 import org.xml.sax.SAXException;
 
+import javax.xml.bind.JAXB;
+import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
+import javax.xml.bind.Unmarshaller;
 import java.awt.*;
 import java.awt.image.AreaAveragingScaleFilter;
 import java.io.File;
+import java.io.StringWriter;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
@@ -57,7 +62,11 @@ public class Test {
         String s = createQuery.CreateScenario(Scenario.loadFromXML(new File(FILE_NAME)));
         return s.split(";");
     }
-
+    public static InputData getData(String filepath) throws JAXBException {
+        JAXBContext jaxbContext = JAXBContext.newInstance(InputData.class);
+        Unmarshaller jaxbUnmarshaller = jaxbContext.createUnmarshaller();
+        return (InputData) jaxbUnmarshaller.unmarshal(new File(filepath));
+    }
 
     public static Logger logger = LogManager.getLogger(Test.class);
     public static void main(String... args) {
@@ -69,11 +78,31 @@ public class Test {
             //Make Schema;
             //makeSchema(new CreateQuery().CreateScenario(Scenario.loadFromXML(new File(FILE_NAME))).split(";"));
             String[] s = new CreateQuery().CreateScenario(Scenario.loadFromXML(new File(FILE_NAME))).split(";");
-            //makeSchema(s);
-            Arrays.stream(s).forEach(System.out::println);
-            ArrayList<ArrayList<ArrayList<Table>>> database = RandomDatabase.getDatabase();
-            RandomDatabase.applyDatabase(database);
+            //Arrays.stream(s).forEach(System.out::println);
 
+//            makeSchema(s);
+//            ArrayList<ArrayList<ArrayList<Table>>> database = RandomDatabase.getDatabase();
+//            RandomDatabase.applyDatabase(database);
+            String table = "boiler";
+            String attr = "pressure";
+//            SelectBuilder lastView = TemporalQuery
+//                    .createLastView(new SelectBuilder().from(table+"_"+attr), table, attr);
+
+//            SelectBuilder selectBuilder = new SelectBuilder()
+//                    .column("@rn:=@rn+1 as no")
+//                    .column("T.*")
+//                    .from(new SubSelectBuilder(new SelectBuilder().from(table+"_"+attr),"T"))
+//                    .from("(SELECT @rn:=0) as r")
+//                    .orderBy("T.boilerCode")
+//                    .orderBy("T.valid_from");
+
+             SelectBuilder selectBuilder = new SelectBuilder()
+
+                     .column("LAG(value,1) over ( partition by boilerCode order by valid_from) as prev_value")
+                     .from("boiler_pressure")
+                     .where("id < 5");
+
+             TemporalQuery.createPreviousView(null,null,null);
 
         } catch (Exception throwables) {
 
