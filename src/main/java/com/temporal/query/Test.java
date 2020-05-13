@@ -32,12 +32,8 @@ public class Test {
 //        }
           File file1 = new File("Insert.xml");
           InputData rawdata = InputData.loadFromXML(file1);
-        //InsertQuery.insert(rawdata.getTable());
-//          UpdateQuery.update(rawdata.getTable());
-//        InsertQuery.insert("a");
-          String sql="delete from boiler where pumpCode="+'"'+"P0"+'"'+";";
 
-          DeleteQuery.delete(sql);
+//          UpdateQuery.update(rawdata.getTable());
     }
 }
 

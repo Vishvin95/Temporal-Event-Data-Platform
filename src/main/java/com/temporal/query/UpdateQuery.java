@@ -48,12 +48,6 @@ public class UpdateQuery extends InsertQuery {
 		return send;
 	}
 
-	public static void SetValue(String table,String fk,String fkvalue) throws SQLException{
-		String sql="update "+table+"_"+fk+" set transaction_delete=now() where "+fk+"="+fkvalue+";";
-		Excecutor excecutor=new Excecutor();
-		excecutor.addSqlQuery(new GenericSqlBuilder(sql));
-		excecutor.execute();
-	}
 
 	public static Boolean isOverlap(String table,String validFrom,String validTo) throws SQLException{
 		String sql="select * from "+table+" where (valid_from <="+validFrom+" AND valid_to >="+validFrom+" AND transaction_delete is null"+")"+
@@ -123,7 +117,6 @@ public class UpdateQuery extends InsertQuery {
 						String fkvalue=GetValue(table.getName(),pk,valueMaker(pk,pkValue,temporal_resolver),column.getKey());
                         if(fkvalue.compareTo(column.getValue())!=0)
 						{
-							SetValue(table.getName(),column.getKey(),valueMaker(column.getKey(),fkvalue,temporal_resolver));
 							HistoryUpdate=HistoryUpdate+"insert into "+table.getName()+"_"+column.getKey()+"("+pk+","+column.getKey()+
 									",valid_from,valid_to,transaction_enter) "+"values("+
 									valueMaker(pk,pkValue,temporal_resolver)+","+valueMaker(column.getKey(),column.getValue(),temporal_resolver)+","+

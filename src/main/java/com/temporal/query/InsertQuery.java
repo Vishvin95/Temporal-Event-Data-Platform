@@ -32,7 +32,6 @@ public class InsertQuery  {
     }
 
     public static HashMap<String,ArrayList<String>> temporalResolver() throws SQLException {
-//        HashMap<String,Pair<String,String>> map=new HashMap<>();
         HashMap<String,ArrayList<String>> map=new HashMap<>();
         Excecutor excecutor = new Excecutor();
         excecutor.addSqlQuery(new GenericSqlBuilder("select * from event_config"));
@@ -46,7 +45,6 @@ public class InsertQuery  {
                 temp.add(rs.getString(3));
                 temp.add(rs.getString(4));
                 temp.add(rs.getString(5));
-                //Pair<String,String> pair =new Pair<>(rs.getString(3),rs.getString(4));
                 map.put(rs.getString(2),temp);
             }
         }
@@ -87,7 +85,25 @@ public class InsertQuery  {
         return date == null ? '"'+"9999-12-31 23:59:59"+'"' : '"'+new Timestamp(date.getTime()).toString()+'"';
     }
 
-    public static void insert(Table table) throws SQLException {
+    public static ArrayList<String> getColumn(String TableName) throws SQLException
+    {
+        String sql="describe "+TableName+";";
+        ArrayList<String> send=new ArrayList<>();
+        Excecutor excecutor=new Excecutor();
+        excecutor.addSqlQuery(new GenericSqlBuilder(sql));
+        ArrayList<ResultSet> rs = (ArrayList<ResultSet>) excecutor.execute();
+        for(ResultSet r:rs)
+        {
+            while(r.next())
+            {
+                send.add(r.getString(1));
+            }
+        }
+        return send;
+    }
+
+    public static void insert(Table table) throws SQLException
+    {
 
         String HistoryInsert="";
         String TemporalInsert="";
@@ -160,24 +176,4 @@ public class InsertQuery  {
 
     }
 
-    public static void insert(String query) throws SQLException{
-        String a="insert into abc(q,w,e) values(v,b,h)";
-        String []queries=a.trim().split("into|values");
-        String TableName="";
-        ArrayList<String> columns=new ArrayList<>();
-        queries[1]=queries[1].trim();
-        if(queries[1].charAt(queries[1].length()-1)==')')
-        {
-            TableName=queries[1].split("\\(")[0].trim();
-            System.out.println(TableName);
-            String [] temp1=queries[1].split("\\(|\\)",0);
-            String [] temp2=temp1[1].trim().split(",",0);
-            for(String column:temp2)
-                columns.add(column);
-        }
-        else
-        {
-            TableName=queries[1].trim();
-        }
-    }
 }
