@@ -102,7 +102,7 @@ public class Test {
                      .from("boiler_pressure")
                      .where("id < 5");
 
-             TemporalQuery.createPreviousView(null,null,null);
+             TemporalQuery.createNextScaleView(new SelectBuilder().from("supervisor_salary"),"supervisor","145",5);
 
         } catch (Exception throwables) {
 
