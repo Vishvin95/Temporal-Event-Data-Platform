@@ -147,7 +147,7 @@ public class CreateQuery {
         String EventConfigQuery="create table event_config(domain_name varchar(50),event_name varchar(50),datatype varchar(50)," +
                 "temporal boolean,overlap boolean,primary key(domain_name,event_name));";
         String DomainConfigQuery="create table domain_config(domain_name varchar(50),primaryKey varchar(50));";
-
+        String ForeignKayConfig="create table fk_config(domain_name varchar(50),ForeignKey varchar(50));";
 
         ArrayList<Relationship> relationships=scenario.getRelationships();
 
@@ -236,7 +236,9 @@ public class CreateQuery {
                                 PrimaryKey_Resolver.get(foreignKey).getKey()+" "+dataType_Resolver.get(PrimaryKey_Resolver.get(foreignKey).getValue())+
                                 ","+PrimaryKey_Resolver.get(domain.getName()).getKey()+" "+dataType_Resolver.get(PrimaryKey_Resolver.get(domain.getName()).getValue())+
                                  ",valid_from datetime,valid_to datetime,transaction_enter datetime,transaction_delete datetime);";
-                    
+
+                    ForeignKayConfig=ForeignKayConfig+"insert into fk_config values("+'"'+domain.getName()+'"'+","+'"'+PrimaryKey_Resolver.get(foreignKey).getKey()+'"'+");";
+
                     views.get(domain.getName())
                     		.column(domain.getName()+"_"+PrimaryKey_Resolver.get(foreignKey).getKey() + "." + PrimaryKey_Resolver.get(foreignKey).getKey() + " as "+ PrimaryKey_Resolver.get(foreignKey).getKey())
                     		.where("("+domain.getName()+"_"+PrimaryKey_Resolver.get(foreignKey).getKey()+".valid_from <= now() and now() < "
@@ -264,7 +266,9 @@ public class CreateQuery {
                             PrimaryKey_Resolver.get(foreignKey).getKey()+" "+dataType_Resolver.get(PrimaryKey_Resolver.get(foreignKey).getValue())+
                             ","+PrimaryKey_Resolver.get(domain.getName()).getKey()+" "+dataType_Resolver.get(PrimaryKey_Resolver.get(domain.getName()).getValue())+
                             ",valid_from datetime,valid_to datetime,transaction_enter datetime,transaction_delete datetime);";
-                    
+
+                    ForeignKayConfig=ForeignKayConfig+"insert into fk_config values("+'"'+domain.getName()+'"'+","+'"'+PrimaryKey_Resolver.get(foreignKey).getKey()+'"'+");";
+
                     views.get(domain.getName())
                     .column(domain.getName()+"_"+PrimaryKey_Resolver.get(foreignKey).getKey() + "." + PrimaryKey_Resolver.get(foreignKey).getKey() + " as "+ PrimaryKey_Resolver.get(foreignKey).getKey())
                     .where("("+domain.getName()+"_"+PrimaryKey_Resolver.get(foreignKey).getKey()+".valid_from <= now() and now() < "
@@ -299,7 +303,6 @@ public class CreateQuery {
                         childPair.getKey()+"_"+PrimaryKey_Resolver.get(childPair.getKey()).getKey()+")"+
 
                         ",valid_from datetime,valid_to datetime,transaction_enter datetime,transaction_delete datetime);";
-                //child.remove(); // avoids a ConcurrentModificationException
             }
         }
 
@@ -311,6 +314,6 @@ public class CreateQuery {
         	viewQuery.append(view.toString()+";");
         }        
         
-        return query+temporalQuery+EventConfigQuery+DomainConfigQuery+viewQuery;
+        return query+temporalQuery+EventConfigQuery+DomainConfigQuery+viewQuery+ForeignKayConfig;
     }
 }

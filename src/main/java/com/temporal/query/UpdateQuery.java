@@ -15,6 +15,7 @@ import java.util.StringTokenizer;
 
 import com.temporal.model.Column;
 import com.temporal.model.Table;
+import com.temporal.persistence.DBTablePrinter;
 import com.temporal.persistence.Excecutor;
 import com.temporal.persistence.GenericSqlBuilder;
 import javafx.util.Pair;
@@ -37,18 +38,43 @@ public class UpdateQuery extends InsertQuery {
 	}
 
 	public static String GetValue(String table,String pk,String pkvalue,String fk) throws SQLException{
+		String send="";
 		String sql="select "+fk+" from "+table+" where "+pk+"="+pkvalue+";";
 		Excecutor excecutor=new Excecutor();
 		excecutor.addSqlQuery(new GenericSqlBuilder(sql));
 		ArrayList<ResultSet> rs = (ArrayList<ResultSet>) excecutor.execute();
-		return rs.get(0).toString();
+		System.out.println("haha");
+		while(rs.get(0).next())
+		{
+			send=rs.get(0).getString(1);
+		}
+		return send;
 	}
+
+	public static void SetValue(String table,String fk,String fkvalue) throws SQLException{
+		String sql="update "+table+"_"+fk+" set transaction_delete=now() where "+fk+"="+fkvalue+";";
+		Excecutor excecutor=new Excecutor();
+		excecutor.addSqlQuery(new GenericSqlBuilder(sql));
+		excecutor.execute();
+	}
+
+	public static Boolean isOverlap(String table,String validFrom,String validTo) throws SQLException{
+		String sql="select * from "+table+" where (valid_from <="+validFrom+" AND valid_to >="+validFrom+" AND transaction_delete is null"+")"+
+				"OR (valid_from >="+validFrom+" AND valid_to <="+validTo+" AND transaction_delete is null"+")" + ";";
+		Excecutor excecutor=new Excecutor();
+		excecutor.addSqlQuery(new GenericSqlBuilder(sql));
+		ArrayList<ResultSet> rs = (ArrayList<ResultSet>) excecutor.execute();
+		if(rs.isEmpty())
+			return false;
+		return true;
+	}
+
 
 	public static void update(Table table) throws SQLException  {
 
 		ArrayList<Column> columns=table.getRawReadings();
 		HashMap<String,String> key_resolver=keyResolver();
-		HashMap<String, Pair<String,String>> temporal_resolver=temporalResolver();
+		HashMap<String,ArrayList<String>> temporal_resolver=temporalResolver();
 
 		String HistoryUpdate="";
 		String TemporalUpdate="";
@@ -76,8 +102,13 @@ public class UpdateQuery extends InsertQuery {
 		{
 			for (Column column:columns)
 			{
-				if(Integer.parseInt(temporal_resolver.get(column.getKey()).getValue())==1)
+				if(Integer.parseInt(temporal_resolver.get(column.getKey()).get(1))==1)
 				{
+					if(Integer.parseInt(temporal_resolver.get(column.getKey()).get(2))==0&&isOverlap(table.getName()+"_"+column.getKey(),getValidFromTimestamp(column.getValidFrom()),getValidToTimestamp(column.getValidTo())))
+					{
+						System.out.println("can not update due to validity violation in "+column.getKey());
+						System.exit(1);
+					}
 					TemporalUpdate=TemporalUpdate+"insert into "+table.getName()+"_"+column.getKey()+"("
 							+pk+",value,valid_from,valid_to,transaction_enter) values("+valueMaker(pk,pkValue,temporal_resolver)+","+
 							valueMaker(column.getKey(),column.getValue(),temporal_resolver)+","+getValidFromTimestamp(column.getValidFrom())+
@@ -86,13 +117,15 @@ public class UpdateQuery extends InsertQuery {
 			}
 			for(Column column:columns)
 			{
-				if(Integer.parseInt(temporal_resolver.get(column.getKey()).getValue())==0&&column.getKey().compareTo(pk)!=0)
+				if(Integer.parseInt(temporal_resolver.get(column.getKey()).get(1))==0&&column.getKey().compareTo(pk)!=0)
 				{
 					MainUpdateHelper=MainUpdateHelper.append(column.getKey()+"="+valueMaker(column.getKey(),column.getValue(),temporal_resolver)+",");
 					if(key_resolver.containsKey(column.getKey()))
 					{
-                        if(GetValue(table.getName(),pk,valueMaker(pk,pkValue,temporal_resolver),column.getKey()).compareTo(column.getValue())!=0)
+						String fkvalue=GetValue(table.getName(),pk,valueMaker(pk,pkValue,temporal_resolver),column.getKey());
+                        if(fkvalue.compareTo(column.getValue())!=0)
 						{
+							SetValue(table.getName(),column.getKey(),valueMaker(column.getKey(),fkvalue,temporal_resolver));
 							HistoryUpdate=HistoryUpdate+"insert into "+table.getName()+"_"+column.getKey()+"("+pk+","+column.getKey()+
 									",valid_from,valid_to,transaction_enter) "+"values("+
 									valueMaker(pk,pkValue,temporal_resolver)+","+valueMaker(column.getKey(),column.getValue(),temporal_resolver)+","+

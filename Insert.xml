@@ -3,25 +3,19 @@
 		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 		xsi:noNamespaceSchemaLocation="src/main/resources/Insert.xsd">
 
-	<table name="supervisor">
+	<table name="boiler">
 		<row>
 			<column>
+				<key>boilerCode</key>
+				<value>B0</value>
+			</column>
+			<column>
+				<key>pumpCode</key>
+				<value>P1</value>
+			</column>
+			<column>
 				<key>supId</key>
-				<value>S0</value>
-			</column>
-			<column>
-				<key>name</key>
-				<value>aha</value>
-			</column>
-			<column>
-				<key>age</key>
-				<value>337</value>
-			</column>
-			<column>
-				<key>salary</key>
-				<value>317.0</value>
-				<validFrom>2020-01-01T11:15:20</validFrom>
-				<validTo>2020-01-01T11:41:23</validTo>
+				<value>S2</value>
 			</column>
 		</row>
 	</table>
