@@ -96,13 +96,15 @@ public class Test {
 //                    .orderBy("T.boilerCode")
 //                    .orderBy("T.valid_from");
 
-             SelectBuilder selectBuilder = new SelectBuilder()
+//             SelectBuilder selectBuilder = new SelectBuilder()
+//
+//                     .column("LAG(value,1) over ( partition by boilerCode order by valid_from) as prev_value")
+//                     .from("boiler_pressure")
+//                     .where("id < 5");
+//
+//             TemporalQuery.createNextScaleView(new SelectBuilder().from("supervisor_salary"),"supervisor","145",5);
 
-                     .column("LAG(value,1) over ( partition by boilerCode order by valid_from) as prev_value")
-                     .from("boiler_pressure")
-                     .where("id < 5");
-
-             TemporalQuery.createNextScaleView(new SelectBuilder().from("supervisor_salary"),"supervisor","145",5);
+            TemporalQuery.createTemporalView("boiler");
 
         } catch (Exception throwables) {
 
