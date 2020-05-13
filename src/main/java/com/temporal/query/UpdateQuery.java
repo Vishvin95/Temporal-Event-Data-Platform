@@ -64,7 +64,8 @@ public class UpdateQuery extends InsertQuery {
 		Excecutor excecutor=new Excecutor();
 		excecutor.addSqlQuery(new GenericSqlBuilder(sql));
 		ArrayList<ResultSet> rs = (ArrayList<ResultSet>) excecutor.execute();
-		if(rs.isEmpty())
+
+		if(rs.get(0).toString().isEmpty())
 			return false;
 		return true;
 	}

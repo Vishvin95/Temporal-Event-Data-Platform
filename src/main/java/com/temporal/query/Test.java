@@ -17,12 +17,12 @@ import java.util.List;
 public class Test {
 
     public static void main(String... args) throws JAXBException, SAXException, InvalidScenarioException, SQLException {
-        File file = new File("Scenario1.xml");
-        Scenario scenario = Scenario.loadFromXML(file);
-        scenario.printScenario();
-        CreateQuery q=new CreateQuery();
-        String s=q.CreateScenario(scenario);
-        System.out.println(s);
+//        File file = new File("Scenario1.xml");
+//        Scenario scenario = Scenario.loadFromXML(file);
+//        scenario.printScenario();
+//        CreateQuery q=new CreateQuery();
+//        String s=q.CreateScenario(scenario);
+//        System.out.println(s);
 //        Excecutor excecutor = new Excecutor();
 //        excecutor.addSqlQuery(new GenericSqlBuilder("select * from boiler"));
 //        List<ResultSet> abc = excecutor.execute();
@@ -32,9 +32,12 @@ public class Test {
 //        }
           File file1 = new File("Insert.xml");
           InputData rawdata = InputData.loadFromXML(file1);
-//        InsertQuery.insert(rawdata.getTable());
+        //InsertQuery.insert(rawdata.getTable());
 //          UpdateQuery.update(rawdata.getTable());
 //        InsertQuery.insert("a");
+          String sql="delete from boiler where pumpCode="+'"'+"P0"+'"'+";";
+
+          DeleteQuery.delete(sql);
     }
 }
 
