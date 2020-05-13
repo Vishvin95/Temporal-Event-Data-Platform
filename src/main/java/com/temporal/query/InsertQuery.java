@@ -31,8 +31,9 @@ public class InsertQuery  {
         return map;
     }
 
-    public static HashMap<String,Pair<String,String>> temporalResolver() throws SQLException {
-        HashMap<String,Pair<String,String>> map=new HashMap<>();
+    public static HashMap<String,ArrayList<String>> temporalResolver() throws SQLException {
+//        HashMap<String,Pair<String,String>> map=new HashMap<>();
+        HashMap<String,ArrayList<String>> map=new HashMap<>();
         Excecutor excecutor = new Excecutor();
         excecutor.addSqlQuery(new GenericSqlBuilder("select * from event_config"));
         List<ResultSet> resultSets = excecutor.execute();
@@ -41,17 +42,21 @@ public class InsertQuery  {
         {
             while (rs.next())
             {
-                Pair<String,String> pair =new Pair<>(rs.getString(3),rs.getString(4));
-                map.put(rs.getString(2),pair);
+                ArrayList<String> temp=new ArrayList<>();
+                temp.add(rs.getString(3));
+                temp.add(rs.getString(4));
+                temp.add(rs.getString(5));
+                //Pair<String,String> pair =new Pair<>(rs.getString(3),rs.getString(4));
+                map.put(rs.getString(2),temp);
             }
         }
 
         return map;
     }
 
-    public static String valueMaker(String name,String value,HashMap<String,Pair<String,String>> temporal_resolver)
+    public static String valueMaker(String name,String value,HashMap<String,ArrayList<String>> temporal_resolver)
     {
-        if(temporal_resolver.get(name).getKey().charAt(0)=='V')
+        if(temporal_resolver.get(name).get(0).charAt(0)=='V')
             return '"'+value+'"';
         return value;
 
@@ -90,7 +95,7 @@ public class InsertQuery  {
         String pkValue="";
 
         HashMap<String,String> key_resolver=keyResolver();
-        HashMap<String,Pair<String,String>> temporal_resolver=temporalResolver();
+        HashMap<String,ArrayList<String>> temporal_resolver=temporalResolver();
 
         ArrayList<Column> columns=table.getRawReadings();
 
@@ -106,7 +111,7 @@ public class InsertQuery  {
 
         for (Column column:columns)
         {
-            if(Integer.parseInt(temporal_resolver.get(column.getKey()).getValue())==1)
+            if(Integer.parseInt(temporal_resolver.get(column.getKey()).get(1))==1)
             {
                 TemporalInsert=TemporalInsert+"insert into "+table.getName()+"_"+column.getKey()+"("
                         		+pk+",value,valid_from,valid_to,transaction_enter) values("+valueMaker(pk,pkValue,temporal_resolver)+","+
@@ -119,7 +124,7 @@ public class InsertQuery  {
         String MainInsertHelper=" values("+valueMaker(pk,pkValue,temporal_resolver);
         for(Column column:columns)
         {
-            if(Integer.parseInt(temporal_resolver.get(column.getKey()).getValue())==0&&column.getKey().compareTo(pk)!=0)
+            if(Integer.parseInt(temporal_resolver.get(column.getKey()).get(1))==0&&column.getKey().compareTo(pk)!=0)
             {
                 MainInsert=MainInsert+","+column.getKey();
                 MainInsertHelper=MainInsertHelper+","+valueMaker(column.getKey(),column.getValue(),temporal_resolver);
@@ -153,5 +158,26 @@ public class InsertQuery  {
             queryExecution(HistoryInsert);
         }
 
+    }
+
+    public static void insert(String query) throws SQLException{
+        String a="insert into abc(q,w,e) values(v,b,h)";
+        String []queries=a.trim().split("into|values");
+        String TableName="";
+        ArrayList<String> columns=new ArrayList<>();
+        queries[1]=queries[1].trim();
+        if(queries[1].charAt(queries[1].length()-1)==')')
+        {
+            TableName=queries[1].split("\\(")[0].trim();
+            System.out.println(TableName);
+            String [] temp1=queries[1].split("\\(|\\)",0);
+            String [] temp2=temp1[1].trim().split(",",0);
+            for(String column:temp2)
+                columns.add(column);
+        }
+        else
+        {
+            TableName=queries[1].trim();
+        }
     }
 }
