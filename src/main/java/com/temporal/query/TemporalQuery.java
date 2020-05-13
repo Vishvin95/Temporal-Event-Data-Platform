@@ -8,7 +8,9 @@ import com.temporal.persistence.SubSelectBuilder;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.function.Consumer;
 
 public class TemporalQuery {
     private static final String DOMAIN = "domain";
@@ -30,12 +32,14 @@ public class TemporalQuery {
     private static HashMap<String, ArrayList<String>> tablePrimaryKey;
     private static HashMap<String, ArrayList<String[]>> tableTemporalAttribute;
     private static HashMap<String, HashMap<String, String>> tableTypeInfo;
+    private static HashMap<String,ArrayList<String[]>> tableForeignKey;
 
     static {
         try {
             tablePrimaryKey = createTablePrimaryKey();
             tableTemporalAttribute = createTableTemporalAttribute();
             tableTypeInfo = createTableTypeInfo(currentDatabase());
+            tableForeignKey = createTableForeignKey(currentDatabase());
         } catch (SQLException throwables) {
             throwables.printStackTrace();
         }
@@ -98,6 +102,25 @@ public class TemporalQuery {
         return send;
     }
 
+    private static HashMap<String,ArrayList<String[]>> createTableForeignKey(String database) throws SQLException {
+        HashMap<String,ArrayList<String[]>> send = new HashMap<>();
+        SelectBuilder selectBuilder = new SelectBuilder()
+                .column("TABLE_NAME")
+                .column("COLUMN_NAME")
+                .column("REFERENCED_TABLE_NAME")
+                .column("REFERENCED_COLUMN_NAME")
+                .from("INFORMATION_SCHEMA.KEY_COLUMN_USAGE")
+                .where("REFERENCED_TABLE_SCHEMA='"+database+"'");
+        ResultSet resultSet = new Excecutor().addSqlQuery(selectBuilder).execute().get(0);
+        while (resultSet.next()){
+            if(!send.containsKey(resultSet.getString(1))) send.put(resultSet.getString(1),new ArrayList<>());
+            String col = resultSet.getString(2);
+            String ref_table = resultSet.getString(3);
+            send.get(resultSet.getString(1)).add(new String[]{col,ref_table});
+        }
+        return send;
+    }
+
     private static String currentDatabase() throws SQLException {
         ResultSet resultSet = new Excecutor()
                 .addSqlQuery(new GenericSqlBuilder("select database()"))
@@ -111,17 +134,12 @@ public class TemporalQuery {
     public static void getTables() throws SQLException {
         createTablePrimaryKey();
         createTableTemporalAttribute();
+        tableTemporalAttribute.forEach((s, strings) -> {
+            System.out.print(s+" ");
+            strings.forEach(strings1 -> System.out.print(Arrays.deepToString(strings1)+" "));
+            System.out.println();
+        });
 
-        System.out.println(tablePrimaryKey);
-        System.out.println(tableTemporalAttribute);
-
-//        createFirstView(tablePrimaryKey,tableTemporalAttribute).forEach((key,value) -> {
-//            System.out.println(key+" "+value);
-//        });
-//        createLastView(tablePrimaryKey,tableTemporalAttribute).forEach((key,value)->{
-//            System.out.println(key+" "+value);
-//        });
-        System.out.println(createFirstView("boiler", "pressure"));
     }
 
     public static HashMap<String, String> createFirstView(HashMap<String, ArrayList<String>> tablePrimaryKey, HashMap<String, ArrayList<String[]>> tableTemporalAttribute) {
@@ -303,6 +321,70 @@ public class TemporalQuery {
 
     public static SelectBuilder createNextView(SelectBuilder selectBuilder, String table, String value) {
         return createNextScaleView(selectBuilder, table, value, 1);
+    }
+
+    public static SelectBuilder createTemporalView(String table){
+        ArrayList<String[]> foreingKey = tableForeignKey.get(table);
+        ArrayList<String[]> temporalKey = tableTemporalAttribute.get(table);
+        ArrayList<String> primaryKey = tablePrimaryKey.get(table);
+        SelectBuilder temp_temporalBuilder;
+        ArrayList<String> previous_attribute = new ArrayList<>();
+
+        if(temporalKey.size()!=0){
+            temp_temporalBuilder = new SelectBuilder();
+            primaryKey.forEach(temp_temporalBuilder::column);
+            temp_temporalBuilder.column(VALUE+" as "+table+"_"+temporalKey.get(0)[0])
+                    .column(VALID_FROM)
+                    .column(VALID_TO)
+                    .from(table+"_"+temporalKey.get(0)[0]);
+
+            //adding history of which attributes are added
+            previous_attribute.add(temporalKey.get(0)[0]);
+
+            for(int i = 1,h=temporalKey.size();i<h;i++){
+
+                SelectBuilder builder = new SelectBuilder()
+                        .from(new SubSelectBuilder(temp_temporalBuilder,"B"))
+                        .join(new SubSelectBuilder(new SelectBuilder().from(table+"_"+temporalKey.get(i)[0]),"T"));
+
+
+                //Appending all primary keys
+                primaryKey.forEach(s -> builder.column("T." + s));
+                //Appending previous data;
+                previous_attribute.forEach(s -> {
+                    builder.column("B."+table+"_"+s);
+                });
+                builder.column("T."+VALUE+" as "+table+"_"+temporalKey.get(i)[0]);
+
+                builder.column("(case when T.valid_from >= B.valid_from then T.valid_from else B.valid_from end) as valid_from");
+                builder.column("(case when T.valid_to <= B.valid_to then T.valid_to else B.valid_to end) as valid_to");
+
+                StringBuilder where_caluse = new StringBuilder();
+
+                //Matching based on primary key
+                where_caluse.append("(");
+                for (int i1 = 0; i1 < primaryKey.size(); i1++) {
+                    String s = primaryKey.get(i1);
+                    where_caluse.append("T.").append(s).append("=").append("B.").append(s);
+                    if(i1<primaryKey.size()-1)where_caluse.append(",");
+                }
+                //Mathcing based on overlapping interval
+                where_caluse.append(")");
+                where_caluse.append("and");
+                where_caluse.append("(");
+                where_caluse.append("(T.valid_from >= B.valid_from and T.valid_from<=B.valid_to) or (B.valid_from >= T.valid_from and B.valid_from<=T.valid_to)");
+                where_caluse.append(")");
+
+                builder.where(where_caluse.toString());
+
+                temp_temporalBuilder = builder;
+                previous_attribute.add(temporalKey.get(i)[0]);
+            }
+            System.out.println(temp_temporalBuilder);
+        }
+
+
+        return null;
     }
 
     private static int typeConversion(String sqlType) {
