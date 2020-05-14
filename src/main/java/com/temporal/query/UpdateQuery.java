@@ -41,6 +41,7 @@ public class UpdateQuery extends InsertQuery {
 		excecutor.addSqlQuery(new GenericSqlBuilder(sql));
 		ArrayList<ResultSet> rs = (ArrayList<ResultSet>) excecutor.execute();
 		System.out.println("haha");
+
 		while(rs.get(0).next())
 		{
 			send=rs.get(0).getString(1);

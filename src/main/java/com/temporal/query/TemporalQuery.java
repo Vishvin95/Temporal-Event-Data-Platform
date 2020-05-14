@@ -10,7 +10,6 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.function.Consumer;
 
 public class TemporalQuery {
     private static final String DOMAIN = "domain";
@@ -40,8 +39,8 @@ public class TemporalQuery {
             tableTemporalAttribute = createTableTemporalAttribute();
             tableTypeInfo = createTableTypeInfo(currentDatabase());
             tableForeignKey = createTableForeignKey(currentDatabase());
-        } catch (SQLException throwables) {
-            throwables.printStackTrace();
+        } catch (SQLException throwable) {
+            throwable.printStackTrace();
         }
     }
 
@@ -327,13 +326,13 @@ public class TemporalQuery {
         ArrayList<String[]> foreingKey = tableForeignKey.get(table);
         ArrayList<String[]> temporalKey = tableTemporalAttribute.get(table);
         ArrayList<String> primaryKey = tablePrimaryKey.get(table);
-        SelectBuilder temp_temporalBuilder;
+        SelectBuilder temp_temporalBuilder = null;
         ArrayList<String> previous_attribute = new ArrayList<>();
 
         if(temporalKey.size()!=0){
             temp_temporalBuilder = new SelectBuilder();
             primaryKey.forEach(temp_temporalBuilder::column);
-            temp_temporalBuilder.column(VALUE+" as "+table+"_"+temporalKey.get(0)[0])
+            temp_temporalBuilder.column(VALUE+" as "+temporalKey.get(0)[0])
                     .column(VALID_FROM)
                     .column(VALID_TO)
                     .from(table+"_"+temporalKey.get(0)[0]);
@@ -352,9 +351,9 @@ public class TemporalQuery {
                 primaryKey.forEach(s -> builder.column("T." + s));
                 //Appending previous data;
                 previous_attribute.forEach(s -> {
-                    builder.column("B."+table+"_"+s);
+                    builder.column("B."+s);
                 });
-                builder.column("T."+VALUE+" as "+table+"_"+temporalKey.get(i)[0]);
+                builder.column("T."+VALUE+" as "+temporalKey.get(i)[0]);
 
                 builder.column("(case when T.valid_from >= B.valid_from then T.valid_from else B.valid_from end) as valid_from");
                 builder.column("(case when T.valid_to <= B.valid_to then T.valid_to else B.valid_to end) as valid_to");
@@ -372,7 +371,7 @@ public class TemporalQuery {
                 where_caluse.append(")");
                 where_caluse.append("and");
                 where_caluse.append("(");
-                where_caluse.append("(T.valid_from >= B.valid_from and T.valid_from<=B.valid_to) or (B.valid_from >= T.valid_from and B.valid_from<=T.valid_to)");
+                where_caluse.append("(T.valid_from <= B.valid_from and T.valid_from>=B.valid_to) or (B.valid_from >= T.valid_from and B.valid_from<=T.valid_to)");
                 where_caluse.append(")");
 
                 builder.where(where_caluse.toString());
@@ -380,8 +379,117 @@ public class TemporalQuery {
                 temp_temporalBuilder = builder;
                 previous_attribute.add(temporalKey.get(i)[0]);
             }
-            System.out.println(temp_temporalBuilder);
+            //System.out.println(temp_temporalBuilder);
         }
+        if(foreingKey==null||foreingKey.size()==0) return temp_temporalBuilder;
+
+        int i = 0;
+        if(temp_temporalBuilder==null){
+            temp_temporalBuilder = new SelectBuilder();
+            primaryKey.forEach(temp_temporalBuilder::column);
+            temp_temporalBuilder.column(foreingKey.get(0)[0]+" as "+foreingKey.get(0)[0])
+                    .column(VALID_FROM)
+                    .column(VALID_TO)
+                    .from(table+"_"+foreingKey.get(0)[0]);
+            previous_attribute.add(foreingKey.get(0)[0]);
+            i = 1;
+        }
+        for(;i<foreingKey.size();i++){
+            SelectBuilder builder = new SelectBuilder()
+                    .from(new SubSelectBuilder(temp_temporalBuilder,"B"))
+                    .join(new SubSelectBuilder(new SelectBuilder().from(table+"_"+foreingKey.get(i)[0]),"T"));
+
+
+            //Appending all primary keys
+            primaryKey.forEach(s -> builder.column("T." + s));
+            //Appending previous data;
+            previous_attribute.forEach(s -> {
+                builder.column("B."+s);
+            });
+            builder.column("T."+foreingKey.get(i)[0]+" as "+foreingKey.get(i)[0]);
+
+            builder.column("(case when T.valid_from >= B.valid_from then T.valid_from else B.valid_from end) as valid_from");
+            builder.column("(case when T.valid_to <= B.valid_to then T.valid_to else B.valid_to end) as valid_to");
+
+            StringBuilder where_caluse = new StringBuilder();
+
+            //Matching based on primary key
+            where_caluse.append("(");
+            for (int i1 = 0; i1 < primaryKey.size(); i1++) {
+                String s = primaryKey.get(i1);
+                where_caluse.append("T.").append(s).append("=").append("B.").append(s);
+                if(i1<primaryKey.size()-1)where_caluse.append(",");
+            }
+            //Mathcing based on overlapping interval
+            where_caluse.append(")");
+            where_caluse.append("and");
+            where_caluse.append("(");
+            where_caluse.append("(T.valid_from <= B.valid_from and T.valid_from>=B.valid_to) or (B.valid_from >= T.valid_from and B.valid_from<=T.valid_to)");
+            where_caluse.append(")");
+
+            builder.where(where_caluse.toString());
+
+            temp_temporalBuilder = builder;
+            previous_attribute.add(foreingKey.get(i)[0]);
+        }
+        return temp_temporalBuilder;
+    }
+
+    public static SelectBuilder createTemporalJoinView(String tableA,String tableB,String whereClause){
+        SelectBuilder builder_A  = createTemporalView(tableA);
+        SelectBuilder builder_B  = createTemporalView(tableB);
+
+        ArrayList<String[]> fA = tableForeignKey.get(tableA);
+        ArrayList<String[]> tA = tableTemporalAttribute.get(tableA);
+        ArrayList<String> pA = tablePrimaryKey.get(tableA);
+
+        ArrayList<String[]> fB  = tableForeignKey.get(tableB);
+        ArrayList<String[]> tB = tableTemporalAttribute.get(tableB);
+        ArrayList<String> pB = tablePrimaryKey.get(tableB);
+
+        SelectBuilder temporalJoin = new SelectBuilder();
+        temporalJoin.from(new SubSelectBuilder(builder_A,"T"))
+                .join(new SubSelectBuilder(builder_B,"B"));
+        if(pA!=null)pA.forEach(s -> temporalJoin.column("T."+s));
+        if(tA!=null)tA.forEach(s -> temporalJoin.column("T."+s[0]));
+        if(fA!=null)fA.forEach(s -> temporalJoin.column("T."+s[0]));
+        if(pB!=null)pB.forEach(s -> temporalJoin.column("B."+s));
+        if(tB!=null)tB.forEach(s -> temporalJoin.column("B."+s[0]));
+        if(fB!=null)fB.forEach(s -> temporalJoin.column("B."+s[0]));
+
+
+
+        temporalJoin.column("(case when T.valid_from >= B.valid_from then T.valid_from else B.valid_from end) as valid_from");
+        temporalJoin.column("(case when T.valid_to <= B.valid_to then T.valid_to else B.valid_to end) as valid_to");
+
+        StringBuilder where_caluse = new StringBuilder();
+        where_caluse.append("(");
+        where_caluse.append(whereClause);
+        where_caluse.append(") ");
+        where_caluse.append("and");
+        where_caluse.append(" (");
+        where_caluse.append("(T.valid_from <= B.valid_from and T.valid_from>=B.valid_to) or (B.valid_from >= T.valid_from and B.valid_from<=T.valid_to)");
+        where_caluse.append(")");
+
+        temporalJoin.where(where_caluse.toString());
+
+        return temporalJoin;
+
+    }
+
+    public SelectBuilder createTemporalJoinView(String[] where_clause,String...tables){
+        ArrayList<Object> keyMap = new ArrayList<>();
+        if(tables==null || tables.length <2) return null;
+
+        keyMap.add(tablePrimaryKey.get(tables[0]));
+        keyMap.add(tableTemporalAttribute.get(tables[0]));
+        keyMap.add(tableForeignKey.get(tables[0]));
+        keyMap.add(tablePrimaryKey.get(tables[1]));
+        keyMap.add(tableTemporalAttribute.get(tables[1]));
+        keyMap.add(tableForeignKey.get(tables[1]));
+
+
+
 
 
         return null;
