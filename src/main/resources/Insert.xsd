@@ -13,7 +13,7 @@
 										<xs:element name="column" minOccurs="1"
 											maxOccurs="unbounded">
 											<xs:complexType>
-												<xs:sequence>
+												<xs:all>
 													<xs:element name="key" type="xs:string" />
 													<xs:element name="value">
 														<xs:simpleType>
@@ -22,9 +22,9 @@
 														</xs:simpleType>
 													</xs:element>
 													<!-- validFrom and validTo is applicable to temporal events -->
-													<xs:element name="validFrom" type="xs:dateTime" minOccurs="0"/>
-													<xs:element name="validTo" type="xs:dateTime" minOccurs="0"/>
-												</xs:sequence>
+													<xs:element name="validFrom" type="xs:dateTime" minOccurs="0" />
+													<xs:element name="validTo" type="xs:dateTime" minOccurs="0" />
+												</xs:all>
 											</xs:complexType>
 										</xs:element>
 									</xs:sequence>

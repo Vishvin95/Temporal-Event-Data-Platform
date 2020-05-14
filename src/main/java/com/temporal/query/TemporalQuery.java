@@ -1,15 +1,16 @@
 package com.temporal.query;
 
-import com.temporal.persistence.Excecutor;
-import com.temporal.persistence.GenericSqlBuilder;
-import com.temporal.persistence.SelectBuilder;
-import com.temporal.persistence.SubSelectBuilder;
+import com.temporal.persistence.connection.Excecutor;
+import com.temporal.persistence.builder.GenericSqlBuilder;
+import com.temporal.persistence.builder.SelectBuilder;
+import com.temporal.persistence.builder.SubSelectBuilder;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.stream.Collectors;
 
 public class TemporalQuery {
     private static final String DOMAIN = "domain";
@@ -133,9 +134,9 @@ public class TemporalQuery {
     public static void getTables() throws SQLException {
         createTablePrimaryKey();
         createTableTemporalAttribute();
-        tableTemporalAttribute.forEach((s, strings) -> {
+        tablePrimaryKey.forEach((s, strings) -> {
             System.out.print(s+" ");
-            strings.forEach(strings1 -> System.out.print(Arrays.deepToString(strings1)+" "));
+            strings.forEach(strings1 -> System.out.print(strings1+" "));
             System.out.println();
         });
 
@@ -209,14 +210,18 @@ public class TemporalQuery {
     }
 
     public static SelectBuilder createLastView(SelectBuilder selectBuilder, String table) {
+        //System.out.println(selectBuilder+" "+table);
         SelectBuilder view = new SelectBuilder();
         SelectBuilder temp_view = new SelectBuilder();
 
         ArrayList<String> primaryKey = tablePrimaryKey.get(table);
 
+        //System.out.println(tablePrimaryKey);
+
+
         //Build select query for FIRST
         primaryKey.forEach(temp_view::column);
-        temp_view.column("MIN(T." + VALID_FROM + ") as " + VALID_FROM)
+        temp_view.column("MAX(T." + VALID_FROM + ") as " + VALID_FROM)
                 .from(new SubSelectBuilder(selectBuilder, "T"));
         primaryKey.forEach(temp_view::groupBy);
 
@@ -283,10 +288,7 @@ public class TemporalQuery {
                 .column("T.*")
                 .from(new SubSelectBuilder(selectBuilder, "T"))
                 .where("T.id in (" + temp_pervious.toString() + ")");
-
-        System.out.println(previous);
-
-        return null;
+        return previous;
     }
 
     public static SelectBuilder createNextScaleView(SelectBuilder selectBuilder, String table, String value, int scale) {
@@ -309,9 +311,9 @@ public class TemporalQuery {
                 .from(new SubSelectBuilder(selectBuilder, "T"))
                 .where("T.id in (" + temp_pervious.toString() + ")");
 
-        System.out.println(previous);
 
-        return null;
+
+        return previous;
     }
 
     public static SelectBuilder createPreviousView(SelectBuilder selectBuilder, String table, String value) {
@@ -477,7 +479,10 @@ public class TemporalQuery {
 
     }
 
-    public SelectBuilder createTemporalJoinView(String[] where_clause,String...tables){
+    /*
+        TODO : Incomplete function
+     */
+    public static SelectBuilder createTemporalJoinView(String[] where_clause,String...tables){
         ArrayList<Object> keyMap = new ArrayList<>();
         if(tables==null || tables.length <2) return null;
 
@@ -492,6 +497,76 @@ public class TemporalQuery {
 
 
 
+        return null;
+    }
+
+    public static ResultSet resolveQuery(String query) throws Exception {
+        String type = query.split(" ")[0];
+        if(type.equals("tselect")){
+
+            //Split from from
+            String[] froms = query.split("from");
+            String table = froms[1];
+
+            //Split from tselect;
+            String[] tselects = froms[0].split("tselect");
+
+
+            //last pressure , evolution pressure
+            ArrayList<String> collect = Arrays.stream(tselects)
+                    .filter(s -> !s.trim().equals(""))
+                    .map(String::trim)
+                    .collect(Collectors.toCollection(ArrayList::new));
+
+            String[] split = collect.get(0).split(",");
+
+            //{"last pressure","evolution pressure"}
+            ArrayList<String[]> function_attribute = Arrays.stream(split)
+                    .map(String::trim)
+                    .map(s -> {
+                        String[] s1 = s.trim().split(" ");
+                        String[] strings = Arrays.stream(s1).filter(s2 -> !s2.trim().equals("")).toArray(String[]::new);
+                        return strings;
+                    }).collect(Collectors.toCollection(ArrayList::new));
+
+            SelectBuilder prev = null;
+
+            for(String[] value : function_attribute){
+                System.out.println(Arrays.toString(value));
+                if(prev==null){
+                    prev = new SelectBuilder().from(table+"_"+value[1]);
+                }
+                if(value[0].equals("last")){
+                    prev = createLastView(prev,table.trim());
+                }else if(value[0].equals("first")){
+                    prev = createFirstView(prev,table.trim());
+                }else if(value[0].equals("evolution")){
+                    prev = createEvolutionView(prev,table.trim());
+                }else if(value[0].equals("previous")){
+                    prev = createPreviousView(prev,table.trim(),value[2]);
+                }else if(value[0].equals("next")){
+                    prev = createNextView(prev,table.trim(),value[2]);
+                }else if(value[0].equals("next_scale")){
+                    prev = createNextScaleView(prev,table.trim(),value[2],Integer.parseInt(value[3]));
+                }else if(value[0].equals("previous_scale")){
+                    prev = createPreviousScaleView(prev,table.trim(),value[2],Integer.parseInt(value[3]));
+                }
+            }
+
+            ResultSet resultSet = new Excecutor().addSqlQuery(prev).execute().get(0);
+            return resultSet;
+
+        }else if(type.equals("tjoin")){
+            //Between two tables
+            ArrayList<String> tokens = Arrays.stream(query.split(" "))
+                    .filter(s -> !s.trim().equals(""))
+                    .map(String::trim)
+                    .collect(Collectors.toCollection(ArrayList::new));
+
+            ResultSet resultSet = new Excecutor().addSqlQuery(createTemporalJoinView(tokens.get(1),tokens.get(2),tokens.get(3)))
+                    .execute().get(0);
+            return resultSet;
+        }
         return null;
     }
 

@@ -1,4 +1,4 @@
-package com.temporal.persistence;
+package com.temporal.persistence.builder;
 /* 
     Apricot Management Suite
     Copyright (C) 2020 Tarang Parikh
@@ -10,7 +10,7 @@ package com.temporal.persistence;
     
 */
 
-public class UseBuilder extends AbstractSqlBuilder{
+public class UseBuilder extends AbstractSqlBuilder {
     String database;
 
     public UseBuilder(String database){

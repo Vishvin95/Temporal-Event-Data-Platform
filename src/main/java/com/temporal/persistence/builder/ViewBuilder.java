@@ -1,4 +1,4 @@
-package com.temporal.persistence;
+package com.temporal.persistence.builder;
 
 public class ViewBuilder extends AbstractSqlBuilder {
 	private String name;

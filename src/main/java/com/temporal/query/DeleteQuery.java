@@ -1,12 +1,11 @@
 package com.temporal.query;
 
-import com.temporal.persistence.Excecutor;
-import com.temporal.persistence.GenericSqlBuilder;
+import com.temporal.persistence.connection.Excecutor;
+import com.temporal.persistence.builder.GenericSqlBuilder;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.HashMap;
 
 public class DeleteQuery extends InsertQuery{
 

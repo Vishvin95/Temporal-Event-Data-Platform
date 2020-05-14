@@ -1,22 +1,20 @@
 package com.temporal.persistence;
 
-import com.sun.javafx.util.Logging;
 import com.temporal.model.InvalidScenarioException;
 import com.temporal.model.Scenario;
+import com.temporal.persistence.builder.*;
+import com.temporal.persistence.connection.Excecutor;
+import com.temporal.persistence.util.DBTablePrinter;
 import com.temporal.query.CreateQuery;
-import javafx.util.Pair;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.xml.sax.SAXException;
-import sun.security.x509.X500Name;
 
 import javax.xml.bind.JAXBException;
 import java.io.File;
 import java.sql.*;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Properties;
-import java.util.stream.Collectors;
 
 public class PersistenceApp {
     public static Logger logger = LogManager.getLogger(PersistenceApp.class);

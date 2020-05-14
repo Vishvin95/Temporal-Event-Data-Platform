@@ -21,6 +21,13 @@ public class InputData {
 	
 	}
 
+	@Override
+	public String toString() {
+		return "InputData{" +
+				"table=" + table +
+				'}';
+	}
+
 	@XmlElement(name="table")
 	public Table getTable() {
 		return table;
@@ -40,4 +47,5 @@ public class InputData {
 		InputData data = (InputData) unmarshaller.unmarshal(file);
 		return data;
 	}
+
 }

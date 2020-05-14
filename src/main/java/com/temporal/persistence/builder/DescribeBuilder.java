@@ -1,6 +1,6 @@
-package com.temporal.persistence;
+package com.temporal.persistence.builder;
 
-public class DescribeBuilder extends AbstractSqlBuilder{
+public class DescribeBuilder extends AbstractSqlBuilder {
 	private String table;
 	
 	public DescribeBuilder(String table) {

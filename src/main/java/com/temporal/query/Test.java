@@ -2,17 +2,11 @@ package com.temporal.query;
 
 import com.temporal.model.InputData;
 import com.temporal.model.InvalidScenarioException;
-import com.temporal.model.Scenario;
-import com.temporal.persistence.Excecutor;
-import com.temporal.persistence.GenericSqlBuilder;
-import com.temporal.persistence.DBTablePrinter;
 import org.xml.sax.SAXException;
 
 import javax.xml.bind.JAXBException;
 import java.io.File;
-import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.List;
 
 public class Test {
 

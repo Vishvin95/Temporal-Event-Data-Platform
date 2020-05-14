@@ -1,5 +1,6 @@
-package com.temporal.persistence;
+package com.temporal.persistence.connection;
 
+import com.temporal.persistence.builder.AbstractSqlBuilder;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 

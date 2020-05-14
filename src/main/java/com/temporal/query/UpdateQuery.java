@@ -3,7 +3,6 @@ package com.temporal.query;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-import java.sql.SQLIntegrityConstraintViolationException;
 import java.util.ArrayList;
 import java.sql.SQLSyntaxErrorException;
 import java.util.HashMap;
@@ -12,10 +11,8 @@ import java.util.StringTokenizer;
 
 import com.temporal.model.Column;
 import com.temporal.model.Table;
-import com.temporal.persistence.DBTablePrinter;
-import com.temporal.persistence.Excecutor;
-import com.temporal.persistence.GenericSqlBuilder;
-import javafx.util.Pair;
+import com.temporal.persistence.connection.Excecutor;
+import com.temporal.persistence.builder.GenericSqlBuilder;
 
 public class UpdateQuery extends InsertQuery {
 

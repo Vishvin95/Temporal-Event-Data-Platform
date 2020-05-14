@@ -4,8 +4,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
 
-import com.temporal.persistence.Excecutor;
-import com.temporal.persistence.GenericSqlBuilder;
+import com.temporal.persistence.connection.Excecutor;
+import com.temporal.persistence.builder.GenericSqlBuilder;
 
 public class SelectQuery {	
 	

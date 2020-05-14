@@ -1,4 +1,4 @@
-package com.temporal.persistence;
+package com.temporal.persistence.util;
 
 import java.sql.*;
 import java.util.ArrayList;

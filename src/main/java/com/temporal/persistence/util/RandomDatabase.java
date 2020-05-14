@@ -1,4 +1,4 @@
-package com.temporal.persistence;
+package com.temporal.persistence.util;
 /* 
     Apricot Management Suite
     Copyright (C) 2020 Tarang Parikh

@@ -1,4 +1,4 @@
-package com.temporal.persistence;
+package com.temporal.persistence.connection;
 
 import java.sql.Connection;
 

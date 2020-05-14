@@ -2,7 +2,7 @@ package com.temporal.model;
 
 import org.xml.sax.SAXException;
 
-import com.temporal.persistence.DBTablePrinter;
+import com.temporal.persistence.util.DBTablePrinter;
 import com.temporal.query.CreateQuery;
 import com.temporal.query.InsertQuery;
 import com.temporal.query.SelectQuery;

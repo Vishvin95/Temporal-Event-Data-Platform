@@ -4,8 +4,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
 
-import com.temporal.persistence.DescribeBuilder;
-import com.temporal.persistence.Excecutor;
+import com.temporal.persistence.builder.DescribeBuilder;
+import com.temporal.persistence.connection.Excecutor;
 
 public class DescribeQuery {
 	public static ResultSet getDomainInformation(String domainName)

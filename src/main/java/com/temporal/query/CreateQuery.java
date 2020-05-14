@@ -3,8 +3,8 @@ package com.temporal.query;
 import com.temporal.model.Domain;
 import com.temporal.model.Event;
 import com.temporal.model.Scenario;
-import com.temporal.persistence.SelectBuilder;
-import com.temporal.persistence.ViewBuilder;
+import com.temporal.persistence.builder.SelectBuilder;
+import com.temporal.persistence.builder.ViewBuilder;
 import com.temporal.model.Relationship;
 import javafx.util.Pair;
 
