@@ -15,6 +15,7 @@ import com.temporal.model.*;
 import com.temporal.persistence.builder.GenericSqlBuilder;
 import com.temporal.persistence.builder.SelectBuilder;
 import com.temporal.persistence.connection.Excecutor;
+import com.temporal.persistence.util.DBTablePrinter;
 import com.temporal.persistence.util.RandomDatabase;
 import com.temporal.persistence.util.State;
 import com.temporal.query.CreateQuery;
@@ -33,6 +34,7 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.StringWriter;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.*;
 
@@ -142,13 +144,22 @@ public class Test {
 //            System.out.println(makeData(inputData));
 //            SelectBuilder boiler = TemporalQuery.createTemporalJoinView("boiler","pump","T.pumpCode = B.pumpCode");
 //            System.out.println(boiler);
-            String query = "tselect evolution pressure from boiler";
+            String ll = "tselect evolution pressure from boiler";
+            String nq = "tselect evolution pressure,last pressure from boiler";
+            String sq = "tselect evolution salary,last salary from supervisor";
             String q = "tselect previous salary 354 from supervisor";
-            String qa= "tjoin boiler pump";
+            String qa= "tjoin boiler pump T.pumpCode=B.pumpCode";
+            String nn = "tselect previous salary from supervisor";
             SelectBuilder nextView = TemporalQuery.createPreviousView(new SelectBuilder().from("supervisor_salary"), "supervisor", "225");
             System.out.println(nextView);
-            TemporalQuery.resolveQuery(qa);
+
+
+
+
+            ResultSet resultSet = TemporalQuery.resolveQuery(qa);
+            DBTablePrinter.printResultSet(resultSet);
             //TemporalQuery.getTables();
+
 
         } catch (Exception throwables) {
 
