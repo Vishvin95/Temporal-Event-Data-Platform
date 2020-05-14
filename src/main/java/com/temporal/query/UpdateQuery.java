@@ -11,16 +11,10 @@ import java.util.StringTokenizer;
 
 import com.temporal.model.Column;
 import com.temporal.model.Table;
-<<<<<<< HEAD
+
 import com.temporal.persistence.connection.Excecutor;
 import com.temporal.persistence.builder.GenericSqlBuilder;
-=======
 
-import com.temporal.persistence.DBTablePrinter;
-import com.temporal.persistence.Excecutor;
-import com.temporal.persistence.GenericSqlBuilder;
-
->>>>>>> 46f16ad67c30c5b37d7786460abfc36542bc56b0
 
 public class UpdateQuery extends InsertQuery {
 
