@@ -41,6 +41,7 @@ public class UpdateQuery extends InsertQuery {
 		excecutor.addSqlQuery(new GenericSqlBuilder(sql));
 		ArrayList<ResultSet> rs = (ArrayList<ResultSet>) excecutor.execute();
 		System.out.println("haha");
+
 		while(rs.get(0).next())
 		{
 			send=rs.get(0).getString(1);
@@ -56,14 +57,16 @@ public class UpdateQuery extends InsertQuery {
 	}
 
 	public static Boolean isOverlap(String table,String validFrom,String validTo) throws SQLException{
-		String sql="select * from "+table+" where (valid_from <="+validFrom+" AND valid_to >="+validFrom+" AND transaction_delete is null"+")"+
-				"OR (valid_from >="+validFrom+" AND valid_to <="+validTo+" AND transaction_delete is null"+")" + ";";
+		String sql="select count(*) from "+table+" where (valid_from >="+validFrom+" AND valid_to <="+validFrom+" AND transaction_delete is null"+")"+
+				"OR (valid_from >="+validTo+" AND valid_to <="+validTo+" AND transaction_delete is null"+")" + ";";
 		Excecutor excecutor=new Excecutor();
 		excecutor.addSqlQuery(new GenericSqlBuilder(sql));
 		ArrayList<ResultSet> rs = (ArrayList<ResultSet>) excecutor.execute();
-		if(rs.isEmpty())
-			return false;
-		return true;
+		int count = 0;
+		while (rs.get(0).next()){
+			count = rs.get(0).getInt(1);
+		}
+		return count != 0;
 	}
 
 

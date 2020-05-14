@@ -83,8 +83,10 @@ public class Test {
 //            makeSchema(s);
 //            ArrayList<ArrayList<ArrayList<Table>>> database = RandomDatabase.getDatabase();
 //            RandomDatabase.applyDatabase(database);
-            String table = "boiler";
-            String attr = "pressure";
+
+
+//            String table = "boiler";
+//            String attr = "pressure";
 //            SelectBuilder lastView = TemporalQuery
 //                    .createLastView(new SelectBuilder().from(table+"_"+attr), table, attr);
 
@@ -104,7 +106,10 @@ public class Test {
 //
 //             TemporalQuery.createNextScaleView(new SelectBuilder().from("supervisor_salary"),"supervisor","145",5);
 
-            TemporalQuery.createTemporalView("boiler");
+            System.out.println(TemporalQuery.createTemporalView("boiler"));
+
+//            SelectBuilder boiler = TemporalQuery.createTemporalJoinView("boiler","pump","T.pumpCode = B.pumpCode");
+//            System.out.println(boiler);
 
         } catch (Exception throwables) {
 
