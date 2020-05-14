@@ -3,7 +3,6 @@ package com.temporal.query;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-import java.sql.SQLIntegrityConstraintViolationException;
 import java.util.ArrayList;
 import java.sql.SQLSyntaxErrorException;
 import java.util.HashMap;
@@ -12,10 +11,11 @@ import java.util.StringTokenizer;
 
 import com.temporal.model.Column;
 import com.temporal.model.Table;
+
 import com.temporal.persistence.DBTablePrinter;
 import com.temporal.persistence.Excecutor;
 import com.temporal.persistence.GenericSqlBuilder;
-import javafx.util.Pair;
+
 
 public class UpdateQuery extends InsertQuery {
 
@@ -50,16 +50,20 @@ public class UpdateQuery extends InsertQuery {
 
 
 	public static Boolean isOverlap(String table,String validFrom,String validTo) throws SQLException{
-		String sql="select count(*) from "+table+" where (valid_from >="+validFrom+" AND valid_to <="+validFrom+" AND transaction_delete is null"+")"+
-				"OR (valid_from >="+validTo+" AND valid_to <="+validTo+" AND transaction_delete is null"+")" + ";";
+		String sql="select * from "+table+" where (valid_from <="+validFrom+" AND valid_to >="+validFrom+" AND transaction_delete is null"+")"+
+				"OR (valid_from >="+validFrom+" AND valid_to <="+validTo+" AND transaction_delete is null"+")" + ";";
 		Excecutor excecutor=new Excecutor();
 		excecutor.addSqlQuery(new GenericSqlBuilder(sql));
 		ArrayList<ResultSet> rs = (ArrayList<ResultSet>) excecutor.execute();
-		int count = 0;
-		while (rs.get(0).next()){
-			count = rs.get(0).getInt(1);
-		}
-		return count != 0;
+		ResultSet ab=rs.get(0);
+		String result="";
+		while(ab.next())
+			{
+				result=result+ab.getString(1);
+			}
+		if(result.compareTo("")==0)
+			return false;
+		return true;
 	}
 
 
@@ -133,9 +137,7 @@ public class UpdateQuery extends InsertQuery {
 			temp = " where "+pk+"="+valueMaker(pk,pkValue,temporal_resolver)+";";
 			MainUpdate.append(temp);
 
-			System.out.println(MainUpdate);
-			System.out.println(TemporalUpdate);
-			System.out.println(HistoryUpdate);
+
 
 			boolean success=true;
 			try
