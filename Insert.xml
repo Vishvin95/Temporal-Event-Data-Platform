@@ -11,11 +11,24 @@
 			</column>
 			<column>
 				<key>pumpCode</key>
-				<value>P1</value>
+				<value>P0</value>
 			</column>
 			<column>
 				<key>supId</key>
-				<value>S2</value>
+				<value>S0</value>
+			</column>
+			<column>
+				<key>pressure</key>
+				<value>21.038044</value>
+				<validFrom>2020-01-01T13:06:26</validFrom>
+				<validTo>2020-01-01T20:03:12</validTo>
+			</column>
+			<column>
+				<key>temperature</key>
+				<value>68.1832</value>
+				<validFrom>2020-01-01T09:34:43</validFrom>
+				<validTo>2020-01-01T10:13:38</validTo>
+
 			</column>
 		</row>
 	</table>

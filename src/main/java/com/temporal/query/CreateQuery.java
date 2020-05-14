@@ -146,7 +146,7 @@ public class CreateQuery {
         String temporalQuery="";
         String EventConfigQuery="create table event_config(domain_name varchar(50),event_name varchar(50),datatype varchar(50)," +
                 "temporal boolean,overlap boolean,primary key(domain_name,event_name));";
-        String DomainConfigQuery="create table domain_config(domain_name varchar(50),primaryKey varchar(50));";
+        String DomainConfigQuery="create table domain_config(domain_name varchar(50),primaryKey varchar(50),datatype varchar(50));";
         String ForeignKayConfig="create table fk_config(domain_name varchar(50),ForeignKey varchar(50));";
 
         ArrayList<Relationship> relationships=scenario.getRelationships();
@@ -216,7 +216,7 @@ public class CreateQuery {
             query=query+");";
 
             DomainConfigQuery=DomainConfigQuery+"insert into domain_config values("+'"'+domain.getName()+'"'+
-                    ","+'"'+PrimaryKey_Resolver.get(domain.getName()).getKey()+'"'+");";
+                    ","+'"'+PrimaryKey_Resolver.get(domain.getName()).getKey()+'"'+","+'"'+dataType_Resolver.get(PrimaryKey_Resolver.get(domain.getName()).getValue())+'"'+");";
             views.put(domain.getName(), select);
         }
 

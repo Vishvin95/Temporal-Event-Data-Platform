@@ -37,6 +37,7 @@ public class Excecutor {
                         ||query[0].toLowerCase().equals("use")
                         ||query[0].toLowerCase().equals("insert")
                         ||query[0].toLowerCase().equals("drop")
+                        ||query[0].toLowerCase().equals("delete")
                 )
                 statement.executeUpdate(abstractSqlBuilder.toString());
                 else{
