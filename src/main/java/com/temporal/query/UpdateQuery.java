@@ -15,13 +15,6 @@ import com.temporal.model.Table;
 import com.temporal.persistence.connection.Excecutor;
 import com.temporal.persistence.builder.GenericSqlBuilder;
 
-
-import com.temporal.persistence.util.DBTablePrinter;
-import com.temporal.persistence.connection.Excecutor;
-import com.temporal.persistence.builder.GenericSqlBuilder;
-
-
-
 public class UpdateQuery extends InsertQuery {
 
 	public static String GetResultSet(String sql) throws SQLException{

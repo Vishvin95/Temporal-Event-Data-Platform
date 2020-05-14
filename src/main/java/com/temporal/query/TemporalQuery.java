@@ -174,6 +174,7 @@ public class TemporalQuery {
         return createLastView(new SelectBuilder().from(table + "_" + temporalAttribute), table).toString();
     }
 
+
     public static SelectBuilder createFirstView(SelectBuilder selectBuilder, String table) {
         SelectBuilder view = new SelectBuilder();
         SelectBuilder temp_view = new SelectBuilder();
@@ -500,6 +501,10 @@ public class TemporalQuery {
         return null;
     }
 
+    /*
+        tselect first pressure from boiler
+
+     */
     public static ResultSet resolveQuery(String query) throws Exception {
         String type = query.split(" ")[0];
         if(type.equals("tselect")){
