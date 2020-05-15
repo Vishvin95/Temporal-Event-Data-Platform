@@ -99,18 +99,18 @@ public class Test {
 
 //            makeSchema(s);
             ArrayList<ArrayList<ArrayList<Table>>> database = RandomDatabase.getDatabase();
-//            for (ArrayList<ArrayList<Table>> arrayLists : database) {
-//                int counter = 0;
-//                for (ArrayList<Table> tables : arrayLists) {
-//                    for (int i = 0, h = tables.size(); i < h; i++) {
-//                        InputData inputData = new InputData();
-//                        inputData.setTable(tables.get(i));
-//                        makeFile("./data",inputData,inputData.getTable().getName()+"_"+counter+".xml");
-//                        counter++;
-//                        //Thread.sleep(100000);
-//                    }
-//                }
-//            }
+            for (ArrayList<ArrayList<Table>> arrayLists : database) {
+                int counter = 0;
+                for (ArrayList<Table> tables : arrayLists) {
+                    for (int i = 0, h = tables.size(); i < h; i++) {
+                        InputData inputData = new InputData();
+                        inputData.setTable(tables.get(i));
+                        makeFile("./data",inputData,inputData.getTable().getName()+"_"+counter+".xml");
+                        counter++;
+                        //Thread.sleep(100000);
+                    }
+                }
+            }
            // System.out.println(getData("./insertBoiler/boiler_0.xml"));
 
 
@@ -156,7 +156,7 @@ public class Test {
 
 
 
-            ResultSet resultSet = TemporalQuery.resolveQuery(qa);
+            ResultSet resultSet = TemporalQuery.resolveQuery(nq);
             DBTablePrinter.printResultSet(resultSet);
             //TemporalQuery.getTables();
 

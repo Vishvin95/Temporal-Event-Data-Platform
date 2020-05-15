@@ -19,9 +19,8 @@ public class Test {
         String s=q.CreateScenario(scenario);
         System.out.println(s);
 
-          File file1 = new File("Insert.xml");
-          InputData rawdata = InputData.loadFromXML(file1);
-//          InsertQuery.insert(rawdata.getTable());
+//          File file1 = new File("Insert.xml");
+//          InputData rawdata = InputData.loadFromXML(file1);
 //          UpdateQuery.update(rawdata.getTable());
     }
 }

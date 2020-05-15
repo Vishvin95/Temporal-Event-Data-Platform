@@ -32,11 +32,11 @@ import java.util.stream.Collectors;
 
 public class RandomDatabase {
     private static final int PRIMARY_KEY_BOILER = 10;
-    private static final int TEMPORAL_VARIATION_BOILER = 5;
+    private static final int TEMPORAL_VARIATION_BOILER = 10;
     private static final int PRIMARY_KEY_PUMP = 10;
-    private static final int TEMPORAL_VARIATION_PUMP = 5;
+    private static final int TEMPORAL_VARIATION_PUMP = 10;
     private static final int PRIMARY_KEY_SUPERVISOR = 10;
-    private static final int TEMPORAL_VARIATION_SUPERVISOR = 5;
+    private static final int TEMPORAL_VARIATION_SUPERVISOR = 10;
     private static Float randomFloat(){
         return ThreadLocalRandom.current().nextFloat() * 100 + 1;
     }

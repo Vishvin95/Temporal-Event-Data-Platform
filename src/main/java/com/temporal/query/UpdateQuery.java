@@ -14,6 +14,7 @@ import com.temporal.model.Table;
 
 import com.temporal.persistence.connection.Excecutor;
 import com.temporal.persistence.builder.GenericSqlBuilder;
+import com.temporal.persistence.util.DBTablePrinter;
 
 public class UpdateQuery extends InsertQuery {
 
@@ -48,23 +49,22 @@ public class UpdateQuery extends InsertQuery {
 	}
 
 
-	public static Boolean isOverlap(String table,String validFrom,String validTo) throws SQLException{
-		String sql="select * from "+table+" where (valid_from <="+validFrom+" AND valid_to >="+validFrom+" AND transaction_delete is null"+")"+
-				"OR (valid_from >="+validFrom+" AND valid_to <="+validTo+" AND transaction_delete is null"+")" + ";";
+	public static Boolean isOverlap(String table,String validFrom,String validTo,String pk,String pkvalue) throws SQLException{
+		String sql="select count(*) from "+table+" where ( "+pk+"="+pkvalue+" and valid_from <="+validFrom+" AND valid_to >="+validFrom+" AND transaction_delete is null"+")"+
+				"OR ("+pk+"="+pkvalue+" and valid_from >="+validFrom+" AND valid_to <="+validTo+" AND transaction_delete is null"+")" + ";";
 		Excecutor excecutor=new Excecutor();
 		excecutor.addSqlQuery(new GenericSqlBuilder(sql));
 		ArrayList<ResultSet> rs = (ArrayList<ResultSet>) excecutor.execute();
 		ResultSet ab=rs.get(0);
-		String result="";
+		int count=0;
 		while(ab.next())
 			{
-				result=result+ab.getString(1);
+				count=ab.getInt(1);
 			}
-		if(result.compareTo("")==0)
-			return false;
-		return true;
+		return count!=0;
 	}
 
+	
 
 	public static void update(Table table) throws SQLException  {
 
@@ -100,7 +100,17 @@ public class UpdateQuery extends InsertQuery {
 			{
 				if(Integer.parseInt(temporal_resolver.get(column.getKey()).get(1))==1)
 				{
-					if(Integer.parseInt(temporal_resolver.get(column.getKey()).get(2))==0&&isOverlap(table.getName()+"_"+column.getKey(),getValidFromTimestamp(column.getValidFrom()),getValidToTimestamp(column.getValidTo())))
+					if(Integer.parseInt(temporal_resolver.get(column.getKey()).get(2))==0
+							&&
+							isOverlap
+									(
+											table.getName()+"_"+column.getKey(),
+											getValidFromTimestamp(column.getValidFrom()),
+											getValidToTimestamp(column.getValidTo()),
+											pk,
+											valueMaker(pk,pkValue,temporal_resolver)
+									)
+					)
 					{
 						System.out.println("can not update due to validity violation in "+column.getKey());
 						System.exit(1);
