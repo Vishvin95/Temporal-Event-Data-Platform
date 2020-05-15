@@ -39,8 +39,6 @@ public class UpdateQuery extends InsertQuery {
 		Excecutor excecutor=new Excecutor();
 		excecutor.addSqlQuery(new GenericSqlBuilder(sql));
 		ArrayList<ResultSet> rs = (ArrayList<ResultSet>) excecutor.execute();
-		System.out.println("haha");
-
 		while(rs.get(0).next())
 		{
 			send=rs.get(0).getString(1);
@@ -64,7 +62,32 @@ public class UpdateQuery extends InsertQuery {
 		return count!=0;
 	}
 
-	
+	public static String getTable(String pk)throws SQLException{
+		String send="";
+		String sql="select domain_name from domain_config where primaryKey="+'"'+pk+'"'+";";
+		Excecutor excecutor=new Excecutor();
+		excecutor.addSqlQuery(new GenericSqlBuilder(sql));
+		ArrayList<ResultSet> rs = (ArrayList<ResultSet>) excecutor.execute();
+		while(rs.get(0).next())
+		{
+			send=rs.get(0).getString(1);
+		}
+		return send;
+	}
+
+	public static String getRelation(String table1,String table2) throws SQLException{
+		String send="";
+		String sql="select relation from relationship_config where (first_domain="+'"'+table1+'"'+" and second_domain="+'"'+table2+'"'+
+				") or (first_domain="+'"'+table2+'"'+" and second_domain="+'"'+table1+'"'+");";
+		Excecutor excecutor=new Excecutor();
+		excecutor.addSqlQuery(new GenericSqlBuilder(sql));
+		ArrayList<ResultSet> rs = (ArrayList<ResultSet>) excecutor.execute();
+		while(rs.get(0).next())
+		{
+			send=rs.get(0).getString(1);
+		}
+		return send;
+	}
 
 	public static void update(Table table) throws SQLException  {
 
@@ -79,7 +102,7 @@ public class UpdateQuery extends InsertQuery {
 		String temp="update "+table.getName()+" set ";
 		StringBuilder MainUpdate=new StringBuilder(temp);
 		StringBuilder MainUpdateHelper=new StringBuilder();
-
+        String delhist="";
 
 
 		for(Column column:columns)
@@ -131,12 +154,18 @@ public class UpdateQuery extends InsertQuery {
 						String fkvalue=GetValue(table.getName(),pk,valueMaker(pk,pkValue,temporal_resolver),column.getKey());
                         if(fkvalue.compareTo(column.getValue())!=0)
 						{
+							if(getRelation(table.getName(),getTable(column.getKey())).compareTo("1")==0)
+							{
+								delhist=delhist+"update "+table.getName()+"_"+column.getKey()+" set transaction_delete=now() where transaction_delete is null and "
+										+pk+"="+valueMaker(pk,pkValue,temporal_resolver)+";";
+							}
 							HistoryUpdate=HistoryUpdate+"insert into "+table.getName()+"_"+column.getKey()+"("+pk+","+column.getKey()+
 									",valid_from,valid_to,transaction_enter) "+"values("+
 									valueMaker(pk,pkValue,temporal_resolver)+","+valueMaker(column.getKey(),column.getValue(),temporal_resolver)+","+
 									getValidFromTimestamp(column.getValidFrom())+","+getValidToTimestamp(column.getValidTo())+",now()"+
 									");";
 						}
+
 
 					}
 				}
@@ -151,7 +180,8 @@ public class UpdateQuery extends InsertQuery {
 			boolean success=true;
 			try
 			{
-				queryExecution(HistoryUpdate);
+				if(!MainUpdateHelper.toString().isEmpty())
+					queryExecution(MainUpdate.toString());
 			}
 			catch (SQLException e)
 			{
@@ -160,8 +190,8 @@ public class UpdateQuery extends InsertQuery {
 			}
 			if(success==true)
 			{
-				if(!MainUpdateHelper.toString().isEmpty())
-					queryExecution(MainUpdate.toString());
+				queryExecution(delhist);
+				queryExecution(HistoryUpdate);
 				queryExecution(TemporalUpdate);
 			}
 		}
